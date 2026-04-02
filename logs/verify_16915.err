@@ -1,0 +1,6 @@
+/var/spool/slurm/slurmd/job16915/slurm_script: line 16: /users/rgupta25/.conda/etc/profile.d/conda.sh: No such file or directory
+
+CondaError: Run 'conda init' before 'conda activate'
+
+Downloading: "https://download.pytorch.org/models/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth" to /users/rgupta25/.cache/torch/hub/checkpoints/maskrcnn_resnet50_fpn_coco-bf2d0c1e.pth
+  0%|          | 0.00/170M [00:00<?, ?B/s]  7%|▋         | 12.1M/170M [00:00<00:01, 127MB/s] 20%|█▉        | 33.1M/170M [00:00<00:00, 180MB/s] 32%|███▏      | 54.1M/170M [00:00<00:00, 197MB/s] 44%|████▍     | 75.1M/170M [00:00<00:00, 206MB/s] 57%|█████▋    | 96.1M/170M [00:00<00:00, 210MB/s] 69%|██████▉   | 117M/170M [00:00<00:00, 213MB/s]  81%|████████  | 137M/170M [00:00<00:00, 212MB/s] 93%|█████████▎| 158M/170M [00:00<00:00, 213MB/s]100%|██████████| 170M/170M [00:00<00:00, 206MB/s]

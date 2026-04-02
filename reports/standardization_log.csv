@@ -1,0 +1,65 @@
+genus,original_file,original_format,original_size,original_channels,output_file,output_size,resize_scale,pad_applied,warnings,status
+Acanthurus,Acanthurus albimento.jpeg,JPEG,800x558,RGB,Acanthurus albimento.png,1024x1024,1.2800,"padded (0px L/R, 155px T/B)",,OK
+Acanthurus,Acanthurus albipectoralis .jpeg,JPEG,1300x866,RGB,Acanthurus albipectoralis.png,1024x1024,0.7877,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus bariene .jpeg,JPEG,725x483,RGB,Acanthurus bariene.png,1024x1024,1.4124,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus blochii.jpeg,JPEG,1000x665,RGB,Acanthurus blochii.png,1024x1024,1.0240,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus chirurgus .jpeg,JPEG,960x541,RGB,Acanthurus chirurgus.png,1024x1024,1.0667,"padded (0px L/R, 223px T/B)",,OK
+Acanthurus,Acanthurus chronixis .jpeg,JPEG,800x533,RGB,Acanthurus chronixis.png,1024x1024,1.2800,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus dussumieri .jpeg,JPEG,1024x768,RGB,Acanthurus dussumieri.png,1024x1024,1.0000 (no resize),"padded (0px L/R, 128px T/B)",,OK
+Acanthurus,Acanthurus fowleri.jpg,JPG,960x518,RGB,Acanthurus fowleri.png,1024x1024,1.0667,"padded (0px L/R, 235px T/B)",,OK
+Acanthurus,Acanthurus gahhm.jpeg,JPEG,1300x866,RGB,Acanthurus gahhm.png,1024x1024,0.7877,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus grammoptilus.jpeg,JPEG,1000x666,RGB,Acanthurus grammoptilus.png,1024x1024,1.0240,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus guttatus.jpeg,JPEG,640x436,RGB,Acanthurus guttatus.png,1024x1024,1.6000,"padded (0px L/R, 163px T/B)",,OK
+Acanthurus,Acanthurus japonicus.jpg,JPG,576x576,RGB,Acanthurus japonicus.png,1024x1024,1.7778,"padded (0px L/R, 0px T/B)",,OK
+Acanthurus,Acanthurus leucocheilus.jpeg,JPEG,576x576,RGB,Acanthurus leucocheilus.png,1024x1024,1.7778,"padded (0px L/R, 0px T/B)",,OK
+Acanthurus,Acanthurus leucosternon .jpeg,JPEG,1000x667,RGB,Acanthurus leucosternon.png,1024x1024,1.0240,"padded (0px L/R, 170px T/B)",,OK
+Acanthurus,Acanthurus lineatus .jpeg,JPEG,725x483,RGB,Acanthurus lineatus.png,1024x1024,1.4124,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus maculiceps .jpeg,JPEG,1000x666,RGB,Acanthurus maculiceps.png,1024x1024,1.0240,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus mata.jpg,JPG,960x608,RGB,Acanthurus mata.png,1024x1024,1.0667,"padded (0px L/R, 187px T/B)",,OK
+Acanthurus,Acanthurus monroviae .jpeg,JPEG,1200x801,RGB,Acanthurus monroviae.png,1024x1024,0.8533,"padded (0px L/R, 170px T/B)",,OK
+Acanthurus,Acanthurus nigricans.jpg,JPG,1060x705,RGB,Acanthurus nigricans.png,1024x1024,0.9660,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus nigricauda .jpeg,JPEG,640x405,RGB,Acanthurus nigricauda.png,1024x1024,1.6000,"padded (0px L/R, 188px T/B)",,OK
+Acanthurus,Acanthurus nigrofuscus .jpeg,JPEG,640x367,RGB,Acanthurus nigrofuscus.png,1024x1024,1.6000,"padded (0px L/R, 218px T/B)",,OK
+Acanthurus,Acanthurus nubilus .jpeg,JPEG,1200x896,RGB,Acanthurus nubilus.png,1024x1024,0.8533,"padded (0px L/R, 129px T/B)",,OK
+Acanthurus,Acanthurus olivaceus .jpeg,JPEG,725x483,RGB,Acanthurus olivaceus.png,1024x1024,1.4124,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus pyroferus.jpg,JPG,960x642,RGB,Acanthurus pyroferus.png,1024x1024,1.0667,"padded (0px L/R, 169px T/B)",,OK
+Acanthurus,Acanthurus sohal .jpeg,JPEG,1000x668,RGB,Acanthurus sohal.png,1024x1024,1.0240,"padded (0px L/R, 170px T/B)",,OK
+Acanthurus,Acanthurus tennentii .jpeg,JPEG,1000x665,RGB,Acanthurus tennentii.png,1024x1024,1.0240,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus tractus .jpeg,JPEG,1300x866,RGB,Acanthurus tractus.png,1024x1024,0.7877,"padded (0px L/R, 171px T/B)",,OK
+Acanthurus,Acanthurus tristis .jpeg,JPEG,1200x800,RGB,Acanthurus tristis.png,1024x1024,0.8533,"padded (0px L/R, 170px T/B)",,OK
+Acanthurus,Acanthurus_achilles.jpg,JPG,620x350,RGB,Acanthurus_achilles.png,1024x1024,1.6516,"padded (0px L/R, 223px T/B)",,OK
+Acanthurus,Acanthurus_triostegus .jpeg,JPEG,960x637,RGB,Acanthurus_triostegus.png,1024x1024,1.0667,"padded (0px L/R, 172px T/B)",,OK
+Acanthurus,Acanthurus_xanthopterus .jpeg,JPEG,960x587,RGB,Acanthurus_xanthopterus.png,1024x1024,1.0667,"padded (0px L/R, 199px T/B)",,OK
+Ctenochaetus,Ctenochaetus binotatus .jpeg,JPEG,640x402,RGB,Ctenochaetus binotatus.png,1024x1024,1.6000,"padded (0px L/R, 190px T/B)",,OK
+Ctenochaetus,Ctenochaetus cyanocheilus.jpeg,JPEG,1000x666,RGB,Ctenochaetus cyanocheilus.png,1024x1024,1.0240,"padded (0px L/R, 171px T/B)",,OK
+Ctenochaetus,Ctenochaetus flavicauda .jpeg,JPEG,640x414,RGB,Ctenochaetus flavicauda.png,1024x1024,1.6000,"padded (0px L/R, 181px T/B)",,OK
+Ctenochaetus,Ctenochaetus hawaiiensis .jpeg,JPEG,1200x895,RGB,Ctenochaetus hawaiiensis.png,1024x1024,0.8533,"padded (0px L/R, 130px T/B)",,OK
+Ctenochaetus,Ctenochaetus marginatus .jpeg,JPEG,1300x866,RGB,Ctenochaetus marginatus.png,1024x1024,0.7877,"padded (0px L/R, 171px T/B)",,OK
+Ctenochaetus,Ctenochaetus striatus .jpeg,JPEG,725x483,RGB,Ctenochaetus striatus.png,1024x1024,1.4124,"padded (0px L/R, 171px T/B)",,OK
+Ctenochaetus,Ctenochaetus strigosus .webp,WEBP,960x650,RGB,Ctenochaetus strigosus.png,1024x1024,1.0667,"padded (0px L/R, 165px T/B)",,OK
+Ctenochaetus,Ctenochaetus tominiensis .jpeg,JPEG,3456x2304,RGB,Ctenochaetus tominiensis.png,1024x1024,0.2963,"padded (0px L/R, 170px T/B)",,OK
+Ctenochaetus,Ctenochaetus truncatus .webp,WEBP,576x576,RGB,Ctenochaetus truncatus.png,1024x1024,1.7778,"padded (0px L/R, 0px T/B)",,OK
+Naso,Naso annulatus .jpeg,JPEG,4096x2720,RGB,Naso annulatus.png,1024x1024,0.2500,"padded (0px L/R, 172px T/B)",,OK
+Naso,Naso brachycentron.jpeg,JPEG,1600x1067,RGB,Naso brachycentron.png,1024x1024,0.6400,"padded (0px L/R, 170px T/B)",,OK
+Naso,Naso brevirostris .jpeg,JPEG,1600x884,RGB,Naso brevirostris.png,1024x1024,0.6400,"padded (0px L/R, 229px T/B)",,OK
+Naso,Naso caesius .jpeg,JPEG,640x443,RGB,Naso caesius.png,1024x1024,1.6000,"padded (0px L/R, 157px T/B)",,OK
+Naso,Naso fageni .jpeg,JPEG,1200x798,RGB,Naso fageni.png,1024x1024,0.8533,"padded (0px L/R, 171px T/B)",,OK
+Naso,Naso hexacanthus .jpeg,JPEG,1200x800,RGB,Naso hexacanthus.png,1024x1024,0.8533,"padded (0px L/R, 170px T/B)",,OK
+Naso,Naso lituratus .jpeg,JPEG,1000x650,RGB,Naso lituratus.png,1024x1024,1.0240,"padded (0px L/R, 179px T/B)",,OK
+Naso,Naso maculatus .jpeg,JPEG,640x412,RGB,Naso maculatus.png,1024x1024,1.6000,"padded (0px L/R, 182px T/B)",,OK
+Naso,Naso minor .jpeg,JPEG,1000x667,RGB,Naso minor.png,1024x1024,1.0240,"padded (0px L/R, 170px T/B)",,OK
+Naso,Naso tergus .jpeg,JPEG,680x357,RGB,Naso tergus.png,1024x1024,1.5059,"padded (0px L/R, 243px T/B)",,OK
+Naso,Naso tonganus .webp,WEBP,960x589,RGB,Naso tonganus.png,1024x1024,1.0667,"padded (0px L/R, 198px T/B)",,OK
+Naso,Naso tuberosus .jpeg,JPEG,1200x857,RGB,Naso tuberosus.png,1024x1024,0.8533,"padded (0px L/R, 146px T/B)",,OK
+Naso,Naso unicornis.jpeg,JPEG,725x483,RGB,Naso unicornis.png,1024x1024,1.4124,"padded (0px L/R, 171px T/B)",,OK
+Naso,Naso vlamingii .webp,WEBP,960x667,RGB,Naso vlamingii.png,1024x1024,1.0667,"padded (0px L/R, 156px T/B)",,OK
+Paracanthurus,Paracanthurus_hepatus.jpg,JPG,800x800,RGB,Paracanthurus_hepatus.png,1024x1024,1.2800,"padded (0px L/R, 0px T/B)",,OK
+Prionurus,Prionurus chrysurus .jpeg,JPEG,1376x903,RGB,Prionurus chrysurus.png,1024x1024,0.7442,"padded (0px L/R, 176px T/B)",,OK
+Prionurus,Prionurus laticlavius .jpeg,JPEG,1024x768,RGB,Prionurus laticlavius.png,1024x1024,1.0000 (no resize),"padded (0px L/R, 128px T/B)",,OK
+Prionurus,Prionurus microlepidotus .jpeg,JPEG,1300x866,RGB,Prionurus microlepidotus.png,1024x1024,0.7877,"padded (0px L/R, 171px T/B)",,OK
+Zebrasoma,Zebrasoma desjardinii .jpeg,JPEG,1000x667,RGB,Zebrasoma desjardinii.png,1024x1024,1.0240,"padded (0px L/R, 170px T/B)",,OK
+Zebrasoma,Zebrasoma flavescens .webp,WEBP,500x539,RGB,Zebrasoma flavescens.png,1024x1024,1.8998,"padded (37px L/R, 0px T/B)",,OK
+Zebrasoma,Zebrasoma gemmatum .jpeg,JPEG,1024x710,RGB,Zebrasoma gemmatum.png,1024x1024,1.0000 (no resize),"padded (0px L/R, 157px T/B)",,OK
+Zebrasoma,Zebrasoma scopas .jpeg,JPEG,1200x900,RGB,Zebrasoma scopas.png,1024x1024,0.8533,"padded (0px L/R, 128px T/B)",,OK
+Zebrasoma,Zebrasoma veliferum .jpeg,JPEG,2560x1885,RGB,Zebrasoma veliferum.png,1024x1024,0.4000,"padded (0px L/R, 135px T/B)",,OK
+Zebrasoma,Zebrasoma xanthurum .jpeg,JPEG,1200x1200,RGB,Zebrasoma xanthurum.png,1024x1024,0.8533,"padded (0px L/R, 0px T/B)",,OK
