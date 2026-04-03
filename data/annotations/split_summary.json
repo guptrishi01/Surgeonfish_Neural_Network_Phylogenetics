@@ -1,0 +1,110 @@
+{
+  "counts": {
+    "train": {
+      "total_images": 43,
+      "annotated": 43,
+      "unannotated": 0
+    },
+    "val": {
+      "total_images": 10,
+      "annotated": 10,
+      "unannotated": 0
+    },
+    "test": {
+      "total_images": 11,
+      "annotated": 11,
+      "unannotated": 0
+    }
+  },
+  "splits": {
+    "train": {
+      "annotated": [
+        "Acanthurus albipectoralis",
+        "Acanthurus bariene",
+        "Acanthurus chronixis",
+        "Acanthurus dussumieri",
+        "Acanthurus grammoptilus",
+        "Acanthurus guttatus",
+        "Acanthurus japonicus",
+        "Acanthurus leucocheilus",
+        "Acanthurus leucosternon",
+        "Acanthurus lineatus",
+        "Acanthurus maculiceps",
+        "Acanthurus mata",
+        "Acanthurus monroviae",
+        "Acanthurus nigricans",
+        "Acanthurus nigricauda",
+        "Acanthurus olivaceus",
+        "Acanthurus sohal",
+        "Acanthurus tractus",
+        "Acanthurus tristis",
+        "Acanthurus_achilles",
+        "Acanthurus_xanthopterus",
+        "Ctenochaetus cyanocheilus",
+        "Ctenochaetus flavicauda",
+        "Ctenochaetus hawaiiensis",
+        "Ctenochaetus striatus",
+        "Ctenochaetus strigosus",
+        "Ctenochaetus tominiensis",
+        "Ctenochaetus truncatus",
+        "Naso brachycentron",
+        "Naso caesius",
+        "Naso hexacanthus",
+        "Naso maculatus",
+        "Naso minor",
+        "Naso tergus",
+        "Naso tonganus",
+        "Naso unicornis",
+        "Naso vlamingii",
+        "Paracanthurus_hepatus",
+        "Prionurus laticlavius",
+        "Zebrasoma flavescens",
+        "Zebrasoma gemmatum",
+        "Zebrasoma veliferum",
+        "Zebrasoma xanthurum"
+      ],
+      "unannotated": [],
+      "total_images": 43,
+      "n_annotated": 43
+    },
+    "val": {
+      "annotated": [
+        "Acanthurus chirurgus",
+        "Acanthurus fowleri",
+        "Acanthurus nubilus",
+        "Acanthurus tennentii",
+        "Acanthurus_triostegus",
+        "Ctenochaetus binotatus",
+        "Naso brevirostris",
+        "Naso tuberosus",
+        "Prionurus chrysurus",
+        "Zebrasoma desjardinii"
+      ],
+      "unannotated": [],
+      "total_images": 10,
+      "n_annotated": 10
+    },
+    "test": {
+      "annotated": [
+        "Acanthurus albimento",
+        "Acanthurus blochii",
+        "Acanthurus gahhm",
+        "Acanthurus nigrofuscus",
+        "Acanthurus pyroferus",
+        "Ctenochaetus marginatus",
+        "Naso fageni",
+        "Naso lituratus",
+        "Naso annulatus",
+        "Prionurus microlepidotus",
+        "Zebrasoma scopas"
+      ],
+      "unannotated": [],
+      "total_images": 11,
+      "n_annotated": 11
+    }
+  },
+  "notes": {
+    "Naso annulatus": "Low-confidence SAM mask. No annotation. Placed in test -- model predicts mask at inference.",
+    "Paracanthurus_hepatus": "Only 1 image for this genus -- train only."
+  }
+}
