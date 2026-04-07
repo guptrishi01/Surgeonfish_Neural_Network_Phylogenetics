@@ -1,0 +1,14 @@
+# Model checkpoints
+*.pth
+*.pt
+*.ckpt
+
+# Outputs
+checkpoints/
+
+# Logs
+logs/
+*.log
+*.out
+*.err
+
