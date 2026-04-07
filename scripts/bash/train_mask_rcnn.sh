@@ -14,8 +14,8 @@ module load anaconda3/2023.09
 conda activate surgeonfish
 
 # Iteration 1: train then immediately inspect val
-python scripts/python/train_mask_rcnn.py --mode train
-python scripts/python/train_mask_rcnn.py --mode val
+#python scripts/python/train_mask_rcnn.py --mode train
+#python scripts/python/train_mask_rcnn.py --mode val
 
 # After inspecting val_predictions/ overlays:
 
@@ -24,14 +24,30 @@ python scripts/python/train_mask_rcnn.py --mode val
 #python scripts/python/prepare_splits.py
 #sbatch run_pipeline.sh   # retrain from scratch
 
+# For a single annotation, run fix_annotation.py on image
+#python scripts/python/fix_annotation.py --species "Prionurus chrysurus"
+
+# Retrain from scratch
+#python scripts/python/train_mask_rcnn.py --mode train
+#python scripts/python/train_mask_rcnn.py --mode train \
+#    --resume outputs/checkpoints/best_model.pth \
+#    --epochs 50
+#python scripts/python/train_mask_rcnn.py \
+#    --mode train \
+#    --unfreeze-backbone \
+#    --epochs 50
+#python scripts/python/train_mask_rcnn.py --mode val
+
 # If prediction is bad but annotation is correct:
 #   Just resume training for more epochs
 #python scripts/python/train_mask_rcnn.py --mode train \
 #    --resume outputs/checkpoints/best_model.pth --epochs 30
 
+python scripts/python/train_mask_rcnn.py --mode val
+
 # Once val masks look correct, run test ONCE:
-#python scripts/python/train_mask_rcnn.py --mode test
+python scripts/python/train_mask_rcnn.py --mode test
 
 # Predict mask for Naso annulatus (no SAM annotation):
-#python scripts/python/train_mask_rcnn.py --mode predict \
-#    --image "data/standardized_images/Naso/Naso annulatus.png"
+python scripts/python/train_mask_rcnn.py --mode predict \
+    --image "data/standardized_images/Naso/Naso annulatus.png"

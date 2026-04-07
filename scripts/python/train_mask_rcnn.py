@@ -92,7 +92,8 @@ LOG_PATH       = OUT_DIR / "training_log.csv"
 NUM_CLASSES    = 2      # 0=background, 1=fish
 NUM_EPOCHS     = 50
 BATCH_SIZE     = 2      # safe for 11 GB VRAM at 1024x1024
-LEARNING_RATE  = 0.005
+LEARNING_RATE  = 0.005  # frozen-backbone default
+LR_UNFREEZE    = 0.0005 # 10x lower when unfreezing backbone
 MOMENTUM       = 0.9
 WEIGHT_DECAY   = 0.0005
 LR_STEP_SIZE   = 15     # decay LR every N epochs
@@ -276,7 +277,12 @@ def compute_mask_ap(
     targets: list,
     iou_threshold: float = 0.5,
 ) -> float:
-    aps = []
+    # COCO-style AP: average over IoU thresholds 0.50, 0.55, ..., 0.95.
+    # Stricter than single IoU=0.5 -- a model that bleeds into background
+    # will score well at 0.5 but poorly at 0.75+, giving a real boundary signal.
+    thresholds = np.arange(0.5, 1.0, 0.05)
+    ap_per_thresh = {float(t): [] for t in thresholds}
+
     for pred, tgt in zip(predictions, targets):
         gt_masks = tgt["masks"].numpy() if tgt["masks"].numel() > 0 else []
         if len(gt_masks) == 0:
@@ -286,15 +292,22 @@ def compute_mask_ap(
         pred_scores = pred.get("scores", [])
 
         if len(pred_masks) == 0:
-            aps.append(0.0)
+            for t in ap_per_thresh:
+                ap_per_thresh[t].append(0.0)
             continue
 
         best_idx = np.argmax(pred_scores)
         pred_bin = (pred_masks[best_idx] > MASK_THRESHOLD)
         gt_bin   = gt_masks[0].astype(bool)
-        aps.append(1.0 if mask_iou(pred_bin, gt_bin) >= iou_threshold else 0.0)
+        iou      = mask_iou(pred_bin, gt_bin)
 
-    return float(np.mean(aps)) if aps else 0.0
+        for t in ap_per_thresh:
+            ap_per_thresh[t].append(1.0 if iou >= t else 0.0)
+
+    per_thresh_means = [
+        float(np.mean(v)) for v in ap_per_thresh.values() if v
+    ]
+    return float(np.mean(per_thresh_means)) if per_thresh_means else 0.0
 
 
 # ---------------------------------------------------------------------------
@@ -457,16 +470,18 @@ def run_training(args):
     # Use --unfreeze-backbone only if val AP plateaus after many epochs.
     if args.unfreeze_backbone:
         params = [p for p in model.parameters() if p.requires_grad]
-        logger.info("Training full model (backbone + heads)")
+        active_lr = LR_UNFREEZE   # 10x lower -- avoids destroying pretrained features
+        logger.info(f"Training full model (backbone + heads)  lr={active_lr}")
     else:
         for name, param in model.named_parameters():
             if "backbone" in name:
                 param.requires_grad = False
         params = [p for p in model.parameters() if p.requires_grad]
+        active_lr = LEARNING_RATE
         logger.info("Backbone frozen -- training heads only")
 
     optimizer = torch.optim.SGD(
-        params, lr=LEARNING_RATE, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY
+        params, lr=active_lr, momentum=MOMENTUM, weight_decay=WEIGHT_DECAY
     )
     scheduler = torch.optim.lr_scheduler.StepLR(
         optimizer, step_size=LR_STEP_SIZE, gamma=LR_GAMMA
@@ -501,7 +516,7 @@ def run_training(args):
     logger.info(f"Val images   : {len(val_ids)}")
     logger.info(f"Epochs       : {NUM_EPOCHS}  (start={start_epoch})")
     logger.info(f"Batch size   : {BATCH_SIZE}")
-    logger.info(f"LR           : {LEARNING_RATE}")
+    logger.info(f"LR           : {active_lr}")
     logger.info("")
 
     for epoch in range(start_epoch, NUM_EPOCHS + 1):
@@ -595,7 +610,7 @@ def run_inference(args, split: str):
     )
 
     mask_ap, preds, tgts = evaluate(model, loader, device)
-    logger.info(f"{split.upper()} mask AP @ IoU=0.5 : {mask_ap:.4f}")
+    logger.info(f"{split.upper()} mask AP @ IoU=0.5:0.95 : {mask_ap:.4f}")
     save_predictions(preds, tgts, dataset, out_dir)
 
     if split == "val":
