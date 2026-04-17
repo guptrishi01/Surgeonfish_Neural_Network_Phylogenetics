@@ -67,41 +67,41 @@ Surgeonfish_Neural_Network_Phylogenetics/
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  1. Preprocessing                        │
-│     • Illumination correction             │
-│     • Orientation normalization           │
-│     • Background noise reduction          │
-│     • Data augmentation (flip, jitter)    │
+│  1. Preprocessing                       │
+│     • Illumination correction           │
+│     • Orientation normalization         │
+│     • Background noise reduction        │
+│     • Data augmentation (flip, jitter)  │
 └────────┬────────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  2. Dataset Prep                         │
-│     • YOLOv8 annotation format            │
-│     • Stratified train/val/test split     │
+│  2. Dataset Prep                        │
+│     • YOLOv8 annotation format          │
+│     • Stratified train/val/test split   │
 └────────┬────────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  3. Training (SLURM + GPU partitions)    │
-│     • YOLOv8m fine-tuned from COCO         │
-│     • AdamW + cosine LR                    │
-│     • Hyperparameter sweep                 │
+│  3. Training (SLURM + GPU partitions)   │
+│     • YOLOv8m fine-tuned from COCO      │
+│     • AdamW + cosine LR                 │
+│     • Hyperparameter sweep              │
 └────────┬────────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  4. Evaluation                           │
-│     • Precision / Recall / mAP@0.5        │
-│     • Per-class confusion matrix          │
-│     • Error analysis                      │
+│  4. Evaluation                          │
+│     • Precision / Recall / mAP@0.5      │
+│     • Per-class confusion matrix        │
+│     • Error analysis                    │
 └────────┬────────────────────────────────┘
          │
          ▼
 ┌─────────────────────────────────────────┐
-│  5. Phylogenetic Comparison (ongoing)    │
-│     • CNN feature embeddings              │
-│     • Compare clustering to known tree    │
+│  5. Phylogenetic Comparison (ongoing)   │
+│     • CNN feature embeddings            │
+│     • Compare clustering to known tree  │
 └─────────────────────────────────────────┘
 ```
 
