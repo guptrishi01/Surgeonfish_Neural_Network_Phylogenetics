@@ -103,7 +103,12 @@ ANN_JSON     = ANN_DIR / "annotations.json"
 # Where Mask R-CNN saved per-image binary mask PNGs
 # The script checks both test_predictions/ and val_predictions/ and
 # predictions/ (single-image predict mode), using whichever exists.
+# Search order matters -- all_predictions/ is first because it contains
+# masks for ALL 64 species generated with a permissive threshold (0.1).
+# test_predictions/ and val_predictions/ are checked as fallbacks only for
+# the 21 val/test species where those files exist and may be higher quality.
 MASK_SEARCH_DIRS = [
+    OUT_DIR / "all_predictions",
     OUT_DIR / "test_predictions",
     OUT_DIR / "val_predictions",
     OUT_DIR / "predictions",
@@ -228,11 +233,25 @@ def extract_features(
     # Load mask and binarise
     # ------------------------------------------------------------------
     try:
-        pil_mask = Image.open(mask_path).convert("L")
+        pil_mask = Image.open(mask_path)
+        # Handle both L (grayscale, Mask R-CNN output) and
+        # RGB (SAM QC masks saved as 3-channel) formats.
+        if pil_mask.mode == "RGB":
+            arr = np.array(pil_mask, dtype=np.uint8)
+            # If all channels identical it is a binary mask saved as RGB
+            if np.allclose(arr[:, :, 0], arr[:, :, 1]) and \
+               np.allclose(arr[:, :, 0], arr[:, :, 2]):
+                mask_np = arr[:, :, 0]
+            else:
+                mask_np = np.array(pil_mask.convert("L"), dtype=np.uint8)
+        elif pil_mask.mode == "RGBA":
+            mask_np = np.array(pil_mask.convert("L"), dtype=np.uint8)
+        else:
+            mask_np = np.array(pil_mask, dtype=np.uint8)
         # Resize mask to image dimensions if needed
         if pil_mask.size != (W, H):
-            pil_mask = pil_mask.resize((W, H), Image.NEAREST)
-        mask_np  = np.array(pil_mask, dtype=np.uint8)
+            pil_mask_l = Image.fromarray(mask_np).resize((W, H), Image.NEAREST)
+            mask_np = np.array(pil_mask_l, dtype=np.uint8)
         mask_bin = mask_np > 127
     except Exception as e:
         log["warning"] = f"Cannot load mask: {e}"

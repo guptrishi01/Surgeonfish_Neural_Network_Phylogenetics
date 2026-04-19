@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Surgeonfish Feature Visualisation</title>
+<style>
+  body  { background:#0f1117; color:#e8e8f0; font-family:sans-serif;
+           margin:0; padding:20px; }
+  h1    { font-size:1.4rem; font-weight:500; margin-bottom:4px; }
+  p     { color:#4a4d5e; font-size:0.85rem; margin-top:0; }
+  .grid { display:grid; grid-template-columns:1fr;
+           gap:24px; max-width:1600px; margin:auto; }
+  .card { background:#1a1d27; border-radius:8px;
+           padding:12px 16px; border:0.5px solid #2a2d3e; }
+  .label{ font-size:1rem; font-weight:500; margin-bottom:8px; }
+  .label em { color:#4fc3f7; font-style:normal; }
+  img   { width:100%; border-radius:4px; display:block; }
+  .toc  { background:#1a1d27; border-radius:8px; padding:12px 16px;
+           margin-bottom:24px; border:0.5px solid #2a2d3e;
+           max-width:1600px; margin:0 auto 24px; }
+  .toc a{ color:#4fc3f7; text-decoration:none; margin-right:16px;
+           font-size:0.82rem; }
+  .toc a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<h1>Surgeonfish Feature Visualisation Report</h1>
+<p>63 species &nbsp;|&nbsp;
+   Each panel: mask overlay, masked fish, hue histogram, S/V scatter,
+   Gabor response (per-fish 99th-pct normalisation),
+   LBP texture (per-fish 99th-pct normalisation),
+   dominant colours, dorsal/ventral split</p>
+
+<div class="toc"><a href="#Acanthurus_Acanthurus_albimento">Aca. Acanthurus albimento</a><a href="#Acanthurus_Acanthurus_albipectoralis">Aca. Acanthurus albipectoralis</a><a href="#Acanthurus_Acanthurus_bariene">Aca. Acanthurus bariene</a><a href="#Acanthurus_Acanthurus_blochii">Aca. Acanthurus blochii</a><a href="#Acanthurus_Acanthurus_chirurgus">Aca. Acanthurus chirurgus</a><a href="#Acanthurus_Acanthurus_chronixis">Aca. Acanthurus chronixis</a><a href="#Acanthurus_Acanthurus_dussumieri">Aca. Acanthurus dussumieri</a><a href="#Acanthurus_Acanthurus_fowleri">Aca. Acanthurus fowleri</a><a href="#Acanthurus_Acanthurus_gahhm">Aca. Acanthurus gahhm</a><a href="#Acanthurus_Acanthurus_grammoptilus">Aca. Acanthurus grammoptilus</a><a href="#Acanthurus_Acanthurus_guttatus">Aca. Acanthurus guttatus</a><a href="#Acanthurus_Acanthurus_japonicus">Aca. Acanthurus japonicus</a><a href="#Acanthurus_Acanthurus_leucocheilus">Aca. Acanthurus leucocheilus</a><a href="#Acanthurus_Acanthurus_leucosternon">Aca. Acanthurus leucosternon</a><a href="#Acanthurus_Acanthurus_lineatus">Aca. Acanthurus lineatus</a><a href="#Acanthurus_Acanthurus_maculiceps">Aca. Acanthurus maculiceps</a><a href="#Acanthurus_Acanthurus_mata">Aca. Acanthurus mata</a><a href="#Acanthurus_Acanthurus_monroviae">Aca. Acanthurus monroviae</a><a href="#Acanthurus_Acanthurus_nigricans">Aca. Acanthurus nigricans</a><a href="#Acanthurus_Acanthurus_nigricauda">Aca. Acanthurus nigricauda</a><a href="#Acanthurus_Acanthurus_nigrofuscus">Aca. Acanthurus nigrofuscus</a><a href="#Acanthurus_Acanthurus_nubilus">Aca. Acanthurus nubilus</a><a href="#Acanthurus_Acanthurus_olivaceus">Aca. Acanthurus olivaceus</a><a href="#Acanthurus_Acanthurus_pyroferus">Aca. Acanthurus pyroferus</a><a href="#Acanthurus_Acanthurus_sohal">Aca. Acanthurus sohal</a><a href="#Acanthurus_Acanthurus_tennentii">Aca. Acanthurus tennentii</a><a href="#Acanthurus_Acanthurus_tractus">Aca. Acanthurus tractus</a><a href="#Acanthurus_Acanthurus_tristis">Aca. Acanthurus tristis</a><a href="#Acanthurus_Acanthurus_achilles">Aca. Acanthurus_achilles</a><a href="#Acanthurus_Acanthurus_triostegus">Aca. Acanthurus_triostegus</a><a href="#Acanthurus_Acanthurus_xanthopterus">Aca. Acanthurus_xanthopterus</a><a href="#Ctenochaetus_Ctenochaetus_binotatus">Cte. Ctenochaetus binotatus</a><a href="#Ctenochaetus_Ctenochaetus_cyanocheilus">Cte. Ctenochaetus cyanocheilus</a><a href="#Ctenochaetus_Ctenochaetus_flavicauda">Cte. Ctenochaetus flavicauda</a><a href="#Ctenochaetus_Ctenochaetus_hawaiiensis">Cte. Ctenochaetus hawaiiensis</a><a href="#Ctenochaetus_Ctenochaetus_marginatus">Cte. Ctenochaetus marginatus</a><a href="#Ctenochaetus_Ctenochaetus_striatus">Cte. Ctenochaetus striatus</a><a href="#Ctenochaetus_Ctenochaetus_strigosus">Cte. Ctenochaetus strigosus</a><a href="#Ctenochaetus_Ctenochaetus_truncatus">Cte. Ctenochaetus truncatus</a><a href="#Naso_Naso_annulatus">Nas. Naso annulatus</a><a href="#Naso_Naso_brachycentron">Nas. Naso brachycentron</a><a href="#Naso_Naso_brevirostris">Nas. Naso brevirostris</a><a href="#Naso_Naso_caesius">Nas. Naso caesius</a><a href="#Naso_Naso_fageni">Nas. Naso fageni</a><a href="#Naso_Naso_hexacanthus">Nas. Naso hexacanthus</a><a href="#Naso_Naso_lituratus">Nas. Naso lituratus</a><a href="#Naso_Naso_maculatus">Nas. Naso maculatus</a><a href="#Naso_Naso_minor">Nas. Naso minor</a><a href="#Naso_Naso_tergus">Nas. Naso tergus</a><a href="#Naso_Naso_tonganus">Nas. Naso tonganus</a><a href="#Naso_Naso_tuberosus">Nas. Naso tuberosus</a><a href="#Naso_Naso_unicornis">Nas. Naso unicornis</a><a href="#Naso_Naso_vlamingii">Nas. Naso vlamingii</a><a href="#Paracanthurus_Paracanthurus_hepatus">Par. Paracanthurus_hepatus</a><a href="#Prionurus_Prionurus_chrysurus">Pri. Prionurus chrysurus</a><a href="#Prionurus_Prionurus_laticlavius">Pri. Prionurus laticlavius</a><a href="#Prionurus_Prionurus_microlepidotus">Pri. Prionurus microlepidotus</a><a href="#Zebrasoma_Zebrasoma_desjardinii">Zeb. Zebrasoma desjardinii</a><a href="#Zebrasoma_Zebrasoma_flavescens">Zeb. Zebrasoma flavescens</a><a href="#Zebrasoma_Zebrasoma_gemmatum">Zeb. Zebrasoma gemmatum</a><a href="#Zebrasoma_Zebrasoma_scopas">Zeb. Zebrasoma scopas</a><a href="#Zebrasoma_Zebrasoma_veliferum">Zeb. Zebrasoma veliferum</a><a href="#Zebrasoma_Zebrasoma_xanthurum">Zeb. Zebrasoma xanthurum</a></div>
+
+<div class="grid">
+
+        <div class="card" id="Acanthurus_Acanthurus_albimento">
+          <div class="label">Acanthurus <em>Acanthurus albimento</em></div>
+          <img src="figures/Acanthurus_Acanthurus_albimento.png" alt="Acanthurus albimento" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_albipectoralis">
+          <div class="label">Acanthurus <em>Acanthurus albipectoralis</em></div>
+          <img src="figures/Acanthurus_Acanthurus_albipectoralis.png" alt="Acanthurus albipectoralis" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_bariene">
+          <div class="label">Acanthurus <em>Acanthurus bariene</em></div>
+          <img src="figures/Acanthurus_Acanthurus_bariene.png" alt="Acanthurus bariene" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_blochii">
+          <div class="label">Acanthurus <em>Acanthurus blochii</em></div>
+          <img src="figures/Acanthurus_Acanthurus_blochii.png" alt="Acanthurus blochii" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_chirurgus">
+          <div class="label">Acanthurus <em>Acanthurus chirurgus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_chirurgus.png" alt="Acanthurus chirurgus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_chronixis">
+          <div class="label">Acanthurus <em>Acanthurus chronixis</em></div>
+          <img src="figures/Acanthurus_Acanthurus_chronixis.png" alt="Acanthurus chronixis" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_dussumieri">
+          <div class="label">Acanthurus <em>Acanthurus dussumieri</em></div>
+          <img src="figures/Acanthurus_Acanthurus_dussumieri.png" alt="Acanthurus dussumieri" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_fowleri">
+          <div class="label">Acanthurus <em>Acanthurus fowleri</em></div>
+          <img src="figures/Acanthurus_Acanthurus_fowleri.png" alt="Acanthurus fowleri" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_gahhm">
+          <div class="label">Acanthurus <em>Acanthurus gahhm</em></div>
+          <img src="figures/Acanthurus_Acanthurus_gahhm.png" alt="Acanthurus gahhm" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_grammoptilus">
+          <div class="label">Acanthurus <em>Acanthurus grammoptilus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_grammoptilus.png" alt="Acanthurus grammoptilus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_guttatus">
+          <div class="label">Acanthurus <em>Acanthurus guttatus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_guttatus.png" alt="Acanthurus guttatus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_japonicus">
+          <div class="label">Acanthurus <em>Acanthurus japonicus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_japonicus.png" alt="Acanthurus japonicus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_leucocheilus">
+          <div class="label">Acanthurus <em>Acanthurus leucocheilus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_leucocheilus.png" alt="Acanthurus leucocheilus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_leucosternon">
+          <div class="label">Acanthurus <em>Acanthurus leucosternon</em></div>
+          <img src="figures/Acanthurus_Acanthurus_leucosternon.png" alt="Acanthurus leucosternon" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_lineatus">
+          <div class="label">Acanthurus <em>Acanthurus lineatus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_lineatus.png" alt="Acanthurus lineatus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_maculiceps">
+          <div class="label">Acanthurus <em>Acanthurus maculiceps</em></div>
+          <img src="figures/Acanthurus_Acanthurus_maculiceps.png" alt="Acanthurus maculiceps" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_mata">
+          <div class="label">Acanthurus <em>Acanthurus mata</em></div>
+          <img src="figures/Acanthurus_Acanthurus_mata.png" alt="Acanthurus mata" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_monroviae">
+          <div class="label">Acanthurus <em>Acanthurus monroviae</em></div>
+          <img src="figures/Acanthurus_Acanthurus_monroviae.png" alt="Acanthurus monroviae" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_nigricans">
+          <div class="label">Acanthurus <em>Acanthurus nigricans</em></div>
+          <img src="figures/Acanthurus_Acanthurus_nigricans.png" alt="Acanthurus nigricans" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_nigricauda">
+          <div class="label">Acanthurus <em>Acanthurus nigricauda</em></div>
+          <img src="figures/Acanthurus_Acanthurus_nigricauda.png" alt="Acanthurus nigricauda" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_nigrofuscus">
+          <div class="label">Acanthurus <em>Acanthurus nigrofuscus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_nigrofuscus.png" alt="Acanthurus nigrofuscus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_nubilus">
+          <div class="label">Acanthurus <em>Acanthurus nubilus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_nubilus.png" alt="Acanthurus nubilus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_olivaceus">
+          <div class="label">Acanthurus <em>Acanthurus olivaceus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_olivaceus.png" alt="Acanthurus olivaceus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_pyroferus">
+          <div class="label">Acanthurus <em>Acanthurus pyroferus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_pyroferus.png" alt="Acanthurus pyroferus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_sohal">
+          <div class="label">Acanthurus <em>Acanthurus sohal</em></div>
+          <img src="figures/Acanthurus_Acanthurus_sohal.png" alt="Acanthurus sohal" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_tennentii">
+          <div class="label">Acanthurus <em>Acanthurus tennentii</em></div>
+          <img src="figures/Acanthurus_Acanthurus_tennentii.png" alt="Acanthurus tennentii" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_tractus">
+          <div class="label">Acanthurus <em>Acanthurus tractus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_tractus.png" alt="Acanthurus tractus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_tristis">
+          <div class="label">Acanthurus <em>Acanthurus tristis</em></div>
+          <img src="figures/Acanthurus_Acanthurus_tristis.png" alt="Acanthurus tristis" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_achilles">
+          <div class="label">Acanthurus <em>Acanthurus_achilles</em></div>
+          <img src="figures/Acanthurus_Acanthurus_achilles.png" alt="Acanthurus_achilles" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_triostegus">
+          <div class="label">Acanthurus <em>Acanthurus_triostegus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_triostegus.png" alt="Acanthurus_triostegus" loading="lazy">
+        </div>
+        <div class="card" id="Acanthurus_Acanthurus_xanthopterus">
+          <div class="label">Acanthurus <em>Acanthurus_xanthopterus</em></div>
+          <img src="figures/Acanthurus_Acanthurus_xanthopterus.png" alt="Acanthurus_xanthopterus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_binotatus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus binotatus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_binotatus.png" alt="Ctenochaetus binotatus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_cyanocheilus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus cyanocheilus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_cyanocheilus.png" alt="Ctenochaetus cyanocheilus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_flavicauda">
+          <div class="label">Ctenochaetus <em>Ctenochaetus flavicauda</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_flavicauda.png" alt="Ctenochaetus flavicauda" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_hawaiiensis">
+          <div class="label">Ctenochaetus <em>Ctenochaetus hawaiiensis</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_hawaiiensis.png" alt="Ctenochaetus hawaiiensis" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_marginatus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus marginatus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_marginatus.png" alt="Ctenochaetus marginatus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_striatus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus striatus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_striatus.png" alt="Ctenochaetus striatus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_strigosus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus strigosus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_strigosus.png" alt="Ctenochaetus strigosus" loading="lazy">
+        </div>
+        <div class="card" id="Ctenochaetus_Ctenochaetus_truncatus">
+          <div class="label">Ctenochaetus <em>Ctenochaetus truncatus</em></div>
+          <img src="figures/Ctenochaetus_Ctenochaetus_truncatus.png" alt="Ctenochaetus truncatus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_annulatus">
+          <div class="label">Naso <em>Naso annulatus</em></div>
+          <img src="figures/Naso_Naso_annulatus.png" alt="Naso annulatus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_brachycentron">
+          <div class="label">Naso <em>Naso brachycentron</em></div>
+          <img src="figures/Naso_Naso_brachycentron.png" alt="Naso brachycentron" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_brevirostris">
+          <div class="label">Naso <em>Naso brevirostris</em></div>
+          <img src="figures/Naso_Naso_brevirostris.png" alt="Naso brevirostris" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_caesius">
+          <div class="label">Naso <em>Naso caesius</em></div>
+          <img src="figures/Naso_Naso_caesius.png" alt="Naso caesius" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_fageni">
+          <div class="label">Naso <em>Naso fageni</em></div>
+          <img src="figures/Naso_Naso_fageni.png" alt="Naso fageni" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_hexacanthus">
+          <div class="label">Naso <em>Naso hexacanthus</em></div>
+          <img src="figures/Naso_Naso_hexacanthus.png" alt="Naso hexacanthus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_lituratus">
+          <div class="label">Naso <em>Naso lituratus</em></div>
+          <img src="figures/Naso_Naso_lituratus.png" alt="Naso lituratus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_maculatus">
+          <div class="label">Naso <em>Naso maculatus</em></div>
+          <img src="figures/Naso_Naso_maculatus.png" alt="Naso maculatus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_minor">
+          <div class="label">Naso <em>Naso minor</em></div>
+          <img src="figures/Naso_Naso_minor.png" alt="Naso minor" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_tergus">
+          <div class="label">Naso <em>Naso tergus</em></div>
+          <img src="figures/Naso_Naso_tergus.png" alt="Naso tergus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_tonganus">
+          <div class="label">Naso <em>Naso tonganus</em></div>
+          <img src="figures/Naso_Naso_tonganus.png" alt="Naso tonganus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_tuberosus">
+          <div class="label">Naso <em>Naso tuberosus</em></div>
+          <img src="figures/Naso_Naso_tuberosus.png" alt="Naso tuberosus" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_unicornis">
+          <div class="label">Naso <em>Naso unicornis</em></div>
+          <img src="figures/Naso_Naso_unicornis.png" alt="Naso unicornis" loading="lazy">
+        </div>
+        <div class="card" id="Naso_Naso_vlamingii">
+          <div class="label">Naso <em>Naso vlamingii</em></div>
+          <img src="figures/Naso_Naso_vlamingii.png" alt="Naso vlamingii" loading="lazy">
+        </div>
+        <div class="card" id="Paracanthurus_Paracanthurus_hepatus">
+          <div class="label">Paracanthurus <em>Paracanthurus_hepatus</em></div>
+          <img src="figures/Paracanthurus_Paracanthurus_hepatus.png" alt="Paracanthurus_hepatus" loading="lazy">
+        </div>
+        <div class="card" id="Prionurus_Prionurus_chrysurus">
+          <div class="label">Prionurus <em>Prionurus chrysurus</em></div>
+          <img src="figures/Prionurus_Prionurus_chrysurus.png" alt="Prionurus chrysurus" loading="lazy">
+        </div>
+        <div class="card" id="Prionurus_Prionurus_laticlavius">
+          <div class="label">Prionurus <em>Prionurus laticlavius</em></div>
+          <img src="figures/Prionurus_Prionurus_laticlavius.png" alt="Prionurus laticlavius" loading="lazy">
+        </div>
+        <div class="card" id="Prionurus_Prionurus_microlepidotus">
+          <div class="label">Prionurus <em>Prionurus microlepidotus</em></div>
+          <img src="figures/Prionurus_Prionurus_microlepidotus.png" alt="Prionurus microlepidotus" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_desjardinii">
+          <div class="label">Zebrasoma <em>Zebrasoma desjardinii</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_desjardinii.png" alt="Zebrasoma desjardinii" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_flavescens">
+          <div class="label">Zebrasoma <em>Zebrasoma flavescens</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_flavescens.png" alt="Zebrasoma flavescens" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_gemmatum">
+          <div class="label">Zebrasoma <em>Zebrasoma gemmatum</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_gemmatum.png" alt="Zebrasoma gemmatum" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_scopas">
+          <div class="label">Zebrasoma <em>Zebrasoma scopas</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_scopas.png" alt="Zebrasoma scopas" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_veliferum">
+          <div class="label">Zebrasoma <em>Zebrasoma veliferum</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_veliferum.png" alt="Zebrasoma veliferum" loading="lazy">
+        </div>
+        <div class="card" id="Zebrasoma_Zebrasoma_xanthurum">
+          <div class="label">Zebrasoma <em>Zebrasoma xanthurum</em></div>
+          <img src="figures/Zebrasoma_Zebrasoma_xanthurum.png" alt="Zebrasoma xanthurum" loading="lazy">
+        </div>
+</div>
+</body>
+</html>

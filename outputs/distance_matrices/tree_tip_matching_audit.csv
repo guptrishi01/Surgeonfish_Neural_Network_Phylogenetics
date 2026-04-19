@@ -1,0 +1,64 @@
+visual_label,matched_tree_tip,match_method,in_tree
+Acanthurus Acanthurus albimento,,none,False
+Acanthurus Acanthurus albipectoralis,,none,False
+Acanthurus Acanthurus bariene,Acanthurus bariene,last_two_words,True
+Acanthurus Acanthurus blochii,Acanthurus blochii,last_two_words,True
+Acanthurus Acanthurus chirurgus,Acanthurus chirurgus,last_two_words,True
+Acanthurus Acanthurus chronixis,,none,False
+Acanthurus Acanthurus dussumieri,Acanthurus dussumieri,last_two_words,True
+Acanthurus Acanthurus fowleri,,none,False
+Acanthurus Acanthurus gahhm,,none,False
+Acanthurus Acanthurus grammoptilus,,none,False
+Acanthurus Acanthurus guttatus,Acanthurus guttatus,last_two_words,True
+Acanthurus Acanthurus japonicus,Acanthurus japonicus,last_two_words,True
+Acanthurus Acanthurus leucocheilus,Acanthurus leucocheilus,last_two_words,True
+Acanthurus Acanthurus leucosternon,Acanthurus leucosternon,last_two_words,True
+Acanthurus Acanthurus lineatus,Acanthurus lineatus,last_two_words,True
+Acanthurus Acanthurus maculiceps,,none,False
+Acanthurus Acanthurus mata,Acanthurus mata,last_two_words,True
+Acanthurus Acanthurus monroviae,Acanthurus monroviae,last_two_words,True
+Acanthurus Acanthurus nigricans,Acanthurus nigricans,last_two_words,True
+Acanthurus Acanthurus nigricauda,Acanthurus nigricauda,last_two_words,True
+Acanthurus Acanthurus nigrofuscus,Acanthurus nigrofuscus,last_two_words,True
+Acanthurus Acanthurus nubilus,Acanthurus nubilus,last_two_words,True
+Acanthurus Acanthurus olivaceus,Acanthurus olivaceus,last_two_words,True
+Acanthurus Acanthurus pyroferus,Acanthurus pyroferus,last_two_words,True
+Acanthurus Acanthurus sohal,,none,False
+Acanthurus Acanthurus tennentii,Acanthurus tennentii,last_two_words,True
+Acanthurus Acanthurus tractus,,none,False
+Acanthurus Acanthurus tristis,,none,False
+Acanthurus Acanthurus_achilles,Acanthurus achilles,epithet_underscore_stripped,True
+Acanthurus Acanthurus_triostegus,Acanthurus triostegus,epithet_underscore_stripped,True
+Acanthurus Acanthurus_xanthopterus,Acanthurus xanthopterus,epithet_underscore_stripped,True
+Ctenochaetus Ctenochaetus binotatus,Ctenochaetus binotatus,last_two_words,True
+Ctenochaetus Ctenochaetus cyanocheilus,Ctenochaetus cyanocheilus,last_two_words,True
+Ctenochaetus Ctenochaetus flavicauda,Ctenochaetus flavicauda,last_two_words,True
+Ctenochaetus Ctenochaetus hawaiiensis,Ctenochaetus hawaiiensis,last_two_words,True
+Ctenochaetus Ctenochaetus marginatus,,none,False
+Ctenochaetus Ctenochaetus striatus,Ctenochaetus striatus,last_two_words,True
+Ctenochaetus Ctenochaetus strigosus,Ctenochaetus strigosus,last_two_words,True
+Ctenochaetus Ctenochaetus truncatus,Ctenochaetus truncatus,last_two_words,True
+Naso Naso annulatus,Naso annulatus,last_two_words,True
+Naso Naso brachycentron,Naso brachycentron,last_two_words,True
+Naso Naso brevirostris,Naso brevirostris,last_two_words,True
+Naso Naso caesius,Naso caesius,last_two_words,True
+Naso Naso fageni,Naso fageni,last_two_words,True
+Naso Naso hexacanthus,Naso hexacanthus,last_two_words,True
+Naso Naso lituratus,Naso lituratus,last_two_words,True
+Naso Naso maculatus,Naso maculatus,last_two_words,True
+Naso Naso minor,Naso minor,last_two_words,True
+Naso Naso tergus,,none,False
+Naso Naso tonganus,Naso tonganus,last_two_words,True
+Naso Naso tuberosus,Naso tuberosus,last_two_words,True
+Naso Naso unicornis,Naso unicornis,last_two_words,True
+Naso Naso vlamingii,Naso vlamingii,last_two_words,True
+Paracanthurus Paracanthurus_hepatus,Paracanthurus hepatus,epithet_underscore_stripped,True
+Prionurus Prionurus chrysurus,,none,False
+Prionurus Prionurus laticlavius,Prionurus laticlavius,last_two_words,True
+Prionurus Prionurus microlepidotus,Prionurus microlepidotus,last_two_words,True
+Zebrasoma Zebrasoma desjardinii,Zebrasoma desjardinii,last_two_words,True
+Zebrasoma Zebrasoma flavescens,Zebrasoma flavescens,last_two_words,True
+Zebrasoma Zebrasoma gemmatum,Zebrasoma gemmatum,last_two_words,True
+Zebrasoma Zebrasoma scopas,Zebrasoma scopas,last_two_words,True
+Zebrasoma Zebrasoma veliferum,,none,False
+Zebrasoma Zebrasoma xanthurum,,none,False

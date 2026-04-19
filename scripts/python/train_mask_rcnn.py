@@ -687,6 +687,92 @@ def run_predict(args):
 # CLI
 # ---------------------------------------------------------------------------
 
+
+# ---------------------------------------------------------------------------
+# Mode: predict all (generate masks for every standardized image)
+# ---------------------------------------------------------------------------
+
+@torch.inference_mode()
+def run_predict_all(args):
+    """
+    Run inference on every image in data/standardized_images/ and save
+    a binary mask PNG to outputs/all_predictions/<species>_mask.png.
+
+    This is needed for feature extraction, which requires masks for all
+    64 species -- not just the val/test splits.
+    """
+    device    = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model     = build_model(NUM_CLASSES).to(device)
+    ckpt_path = Path(args.checkpoint) if args.checkpoint \
+                else CHECKPOINT_DIR / "best_model.pth"
+
+    if not ckpt_path.exists():
+        logger.error(f"No checkpoint at {ckpt_path}. Run --mode train first.")
+        sys.exit(1)
+
+    ckpt = torch.load(ckpt_path, map_location=device)
+    model.load_state_dict(ckpt["model_state"])
+    model.eval()
+    logger.info(f"Loaded: {ckpt_path}")
+
+    out_dir = OUT_DIR / "all_predictions"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # Find all standardized images
+    all_images = []
+    for genus_dir in sorted(STD_DIR.iterdir()):
+        if not genus_dir.is_dir():
+            continue
+        for img_path in sorted(genus_dir.glob("*.png")):
+            all_images.append(img_path)
+
+    logger.info(f"Predicting masks for {len(all_images)} images -> {out_dir}")
+    logger.info("")
+
+    n_ok = 0
+    n_failed = 0
+
+    for img_path in all_images:
+        species  = img_path.stem
+        genus    = img_path.parent.name
+
+        image_np = np.array(Image.open(img_path).convert("RGB"))
+        tensor   = TF.to_tensor(Image.fromarray(image_np)).unsqueeze(0).to(device)
+
+        pred    = model(tensor)[0]
+        scores  = pred["scores"].cpu().numpy()
+        masks   = pred["masks"].squeeze(1).cpu().numpy()
+        valid   = scores >= SCORE_THRESHOLD
+
+        if valid.any():
+            best     = scores[valid].argmax()
+            bin_mask = (masks[valid][best] > MASK_THRESHOLD).astype(np.uint8) * 255
+            n_ok += 1
+            score_str = f"{scores[valid].max():.3f}"
+        else:
+            # No detection above threshold -- try lowered threshold (0.1)
+            low_valid = scores >= 0.1
+            if low_valid.any():
+                best     = scores[low_valid].argmax()
+                bin_mask = (masks[low_valid][best] > MASK_THRESHOLD).astype(np.uint8) * 255
+                n_ok += 1
+                score_str = f"{scores[low_valid].max():.3f} (low confidence)"
+            else:
+                bin_mask  = np.zeros(image_np.shape[:2], dtype=np.uint8)
+                n_failed += 1
+                score_str = "NO DETECTION"
+
+        mask_path = out_dir / f"{species}_mask.png"
+        Image.fromarray(bin_mask, mode="L").save(str(mask_path))
+        logger.info(f"  {genus}/{species}  score={score_str}")
+
+    logger.info("")
+    logger.info(f"Done: {n_ok} masks saved, {n_failed} no-detection")
+    logger.info(f"Output: {out_dir}")
+    logger.info("")
+    logger.info("Next step:")
+    logger.info("  python scripts/python/extract_features.py")
+
 def main():
     global NUM_EPOCHS
     parser = argparse.ArgumentParser(
@@ -694,7 +780,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument(
-        "--mode", choices=["train", "val", "test", "predict"],
+        "--mode", choices=["train", "val", "test", "predict", "predict_all"],
         default="train",
     )
     parser.add_argument("--resume",    type=str, default=None,
@@ -723,6 +809,8 @@ def main():
         if not args.image:
             parser.error("--image is required for --mode predict")
         run_predict(args)
+    elif args.mode == "predict_all":
+        run_predict_all(args)
 
 
 if __name__ == "__main__":

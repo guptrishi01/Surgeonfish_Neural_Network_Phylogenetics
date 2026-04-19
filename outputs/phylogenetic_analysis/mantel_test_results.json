@@ -1,0 +1,24 @@
+{
+  "pca_matrix": {
+    "mantel_r": 0.05487219227002422,
+    "mantel_rho": 0.06442883465420143,
+    "p_pearson": 0.2213,
+    "p_spearman": 0.15533,
+    "n_permutations": 99999,
+    "n_species": 48,
+    "n_pairs": 1128,
+    "min_detectable_r": 0.07414801413389303,
+    "significant_0.05": false
+  },
+  "feature_selected_matrix": {
+    "mantel_r": 0.13707284253670712,
+    "mantel_rho": 0.13432173593658783,
+    "p_pearson": 0.02716,
+    "p_spearman": 0.02587,
+    "n_permutations": 99999,
+    "n_species": 48,
+    "n_pairs": 1128,
+    "min_detectable_r": 0.07414801413389303,
+    "significant_0.05": true
+  }
+}

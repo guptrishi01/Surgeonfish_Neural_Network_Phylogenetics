@@ -1,0 +1,60 @@
+{
+  "n_species": 48,
+  "n_permutations": 99999,
+  "mantel_r_pca": 0.05487219227002422,
+  "mantel_p_pca": 0.2213,
+  "mantel_rho_pca": 0.06442883465420143,
+  "mantel_r_featureselected": 0.13707284253670712,
+  "mantel_p_featureselected": 0.02716,
+  "mantel_rho_featureselected": 0.13432173593658783,
+  "pca_significant_0.05": false,
+  "featureselected_significant_0.05": true,
+  "min_detectable_r": 0.07414801413389303,
+  "robinson_foulds_distance": null,
+  "robinson_foulds_normalised": null,
+  "highest_signal_group": "entropy",
+  "group_mean_r": {
+    "dom_colours": 0.00036026489108407985,
+    "dorsal_ventral": 0.05843598033726552,
+    "entropy": 0.06523433719409658,
+    "gabor": -0.0020757674039287434,
+    "hue_hist": 0.03250887257031148,
+    "lbp": -0.000807933175589097,
+    "sat_hist": 0.02862114857397423,
+    "val_hist": -0.006225199907886518
+  },
+  "n_features_significant_p05": 26,
+  "n_features_negative_r": 40,
+  "top5_features": [
+    {
+      "feature": "hue_bin_090_100",
+      "group": "hue_hist",
+      "r": 0.2639067856310654,
+      "p_value": 1.9877859318566548e-19
+    },
+    {
+      "feature": "hue_bin_080_090",
+      "group": "hue_hist",
+      "r": 0.21992162624333508,
+      "p_value": 8.039708026147509e-14
+    },
+    {
+      "feature": "dorsal_hue_mean",
+      "group": "dorsal_ventral",
+      "r": 0.21097442690608703,
+      "p_value": 8.150916532206215e-13
+    },
+    {
+      "feature": "hue_bin_070_080",
+      "group": "hue_hist",
+      "r": 0.17188982499851604,
+      "p_value": 6.249688478142733e-09
+    },
+    {
+      "feature": "hue_entropy",
+      "group": "entropy",
+      "r": 0.14629702552899268,
+      "p_value": 8.030928892980467e-07
+    }
+  ]
+}

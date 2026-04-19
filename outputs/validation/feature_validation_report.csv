@@ -1,0 +1,41 @@
+test,status,detail
+Species count (expect 63 -- tominiensis excluded),PASS,Got 63 species
+Feature vector length = 99,PASS,"Got shape (63, 99)"
+Feature names count matches matrix columns,PASS,99 names vs 99 columns
+No NaN values in feature matrix,PASS,0 NaN values found
+No Inf values in feature matrix,PASS,0 Inf values found
+Feature group dimensions sum to 99,PASS,Sum = 99
+  Group 'hue_histogram' has non-zero variance,PASS,variance = 0.000099
+  Group 'saturation_hist' has non-zero variance,PASS,variance = 0.000019
+  Group 'value_hist' has non-zero variance,PASS,variance = 0.000016
+  Group 'dominant_colors' has non-zero variance,PASS,variance = 0.063001
+  Group 'dorsal_ventral' has non-zero variance,PASS,variance = 0.070550
+  Group 'gabor_texture' has non-zero variance,PASS,variance = 0.000017
+  Group 'lbp_texture' has non-zero variance,PASS,variance = 0.003433
+  Group 'pattern_entropy' has non-zero variance,PASS,variance = 0.160000
+  Group 'hue_histogram' values >= 0 (density-normalised),PASS,min = 0.000000
+  Group 'saturation_hist' values >= 0 (density-normalised),PASS,min = 0.000000
+  Group 'value_hist' values >= 0 (density-normalised),PASS,min = 0.000000
+  Group 'lbp_texture' values >= 0 (density-normalised),PASS,min = 0.006875
+Pattern entropy values > 0,PASS,min entropy = 0.6026
+Zebrasoma flavescens: low hue entropy (uniform yellow),PASS,hue_entropy=0.646  (< 2.0 expected for uniform color)
+Zebrasoma flavescens: high saturation (vivid yellow),FAIL,mean_saturation_hist=0.0039
+Zebrasoma flavescens: yellow hue bins dominant,PASS,hue_bins[30-60deg] sum=0.0779
+Naso hexacanthus: low hue entropy (uniform grey),FAIL,hue_entropy=2.331
+Naso hexacanthus: dominant low-saturation bin (grey = unsaturated),PASS,saturation_bin_0=0.0046
+Zebrasoma desjardinii entropy > Zebrasoma flavescens entropy,PASS,desjardinii=2.096  flavescens=0.646
+Acanthurus lineatus: high peak Gabor energy (striped pattern),PASS,peak=0.0335  mean=0.0086
+A. lineatus Gabor energy > N. unicornis (stripe vs uniform),PASS,lineatus=0.0086  unicornis=0.0042
+A. achilles has >= 2 dominant color clusters (dark body + orange patch),PASS,clusters >15% coverage: 2  (freqs: [0.526 0.153 0.132 0.114 0.075])
+N. hexacanthus has fewer dominant clusters than A. achilles,PASS,hexacanthus clusters: 1  achilles clusters: 2
+C. striatus LBP entropy >= N. unicornis (fine texture vs smooth),PASS,striatus=2.130  unicornis=2.044
+  Acanthurus blochii: non-zero dorsal/ventral brightness difference,PASS,|dv_val_diff| = 0.0773
+  Acanthurus nigrofuscus: non-zero dorsal/ventral brightness difference,PASS,|dv_val_diff| = 0.0343
+  Acanthurus sohal: non-zero dorsal/ventral brightness difference,PASS,|dv_val_diff| = 0.1076
+Naso mean vector != Acanthurus mean vector (visually distinct genera),PASS,Euclidean distance between genus means = 0.5507
+Between-genus distance > within-genus variance (genus-level signal present),PASS,mean_between=1.0659  mean_within_var=0.1166
+Entropy order: Z.desjardinii >= Acanthurus_mean >= N.hexacanthus,FAIL,desjardinii=2.096  acanthurus_mean=2.092  hexacanthus=2.331
+Zebrasoma species are mutually distinct (min pairwise distance > 0),PASS,Most similar pair: Zebrasoma gemmatum <-> Zebrasoma veliferum  dist=1.2026
+Acanthurus closer to Ctenochaetus than to Naso (phylogenetic signal),FAIL,Acanthurus<->Ctenochaetus=0.5971  Acanthurus<->Naso=0.5507
+Acanthurus closer to Ctenochaetus than to Zebrasoma,PASS,Acanthurus<->Ctenochaetus=0.5971  Acanthurus<->Zebrasoma=0.6747
+Naso species closer to Naso centroid than Zebrasoma centroid,PASS,mean dist to Naso center=0.9818  to Zebrasoma center=1.2218
