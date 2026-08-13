@@ -1,3 +1,9 @@
+# Python build/cache artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
 # Model checkpoints
 *.pth
 *.pt
@@ -11,4 +17,17 @@ logs/
 *.log
 *.out
 *.err
+
+# Personal working notes, not part of the tracked project
+todo.txt
+
+# Derived/regeneratable images. The Phase 0 data/raw_images/*.zip archives
+# (one per species) are the one intentional exception - already tracked in
+# git before this rule was added, so it doesn't affect them. This rule
+# stops *future* zips/PNGs (e.g. Phase 1's standardized_images output) from
+# being tracked - those are meant to be regenerated locally via the
+# pipeline, not committed. Phase 1's first step unzips data/raw_images/
+# back into loose files before processing (see dataset_builder.archive).
+*.zip
+*.png
 
