@@ -7,13 +7,14 @@ feature vector, per the developmental justification in BACKGROUND.md.
 
 **Provenance.** The core color-region-identification step is a Python
 reimplementation of the k-means method from *patternize*, an R package for
-quantifying colour pattern variation (Van Belleghem, Papa, Planas, Martin,
-Counterman, Papa, & Jiggins, 2018, "patternize: An R package for
+quantifying colour pattern variation (Van Belleghem, S. M., Papa, R.,
+Ortiz-Zuazaga, H., Hendrickx, F., Jiggins, C. D., McMillan, W. O., &
+Counterman, B. A., 2018 [online 2017], "patternize: An R package for
 quantifying colour pattern variation," *Methods in Ecology and Evolution*
-9(2), 390-398, https://doi.org/10.1111/2041-210X.12853). patternize has
-been demonstrated on fish and used for phylogenetic comparative colour
-pattern studies, making it the closest published, peer-reviewed precedent
-for this task.
+9(2), 390-398, https://doi.org/10.1111/2041-210X.12853 - author list and
+page numbers verified against Crossref). patternize has been demonstrated
+on fish and used for phylogenetic comparative colour pattern studies,
+making it the closest published, peer-reviewed precedent for this task.
 
 Two deliberate departures from patternize's original method, both because
 this study compares 64 different *species* rather than variation within one
