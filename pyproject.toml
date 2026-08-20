@@ -6,6 +6,21 @@ dependencies = [
     "requests>=2.31",
     "Pillow>=10.0",
     "numpy>=1.26",
+    "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+# GPU-dependent extras for src/fish_extractor/ (Grounded SAM 2). Kept optional
+# so the base install (dataset_builder, no GPU needed) stays light. Installed
+# on Colab, not required to run the test suite (detector.py/segmenter.py are
+# mocked out in tests).
+vision = [
+    "torch",
+    "torchvision",
+    "transformers>=4.44",
+    "sam2",
+    "opencv-python",
+    "accelerate",
 ]
 
 [tool.ruff]
@@ -17,3 +32,10 @@ select = ["E", "F", "I", "W"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
+# Multiple test subpackages (dataset_builder/, fish_extractor/, pattern_extractor/)
+# share filenames like test_pipeline.py/test_state.py; none have __init__.py
+# (that previously caused a src-package-shadowing bug), so pytest's default
+# rootdir-relative import needs unique basenames across the whole suite.
+# importlib mode imports each by its full file path instead, avoiding both
+# problems.
+addopts = "--import-mode=importlib"

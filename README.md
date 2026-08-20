@@ -2,9 +2,10 @@
 
 ## Version
 
-**1.1.0** — see [CLAUDE.md](CLAUDE.md) for the versioning scheme (major = phase completion, minor = a step within a phase, patch = a bug fix).
+**1.2.0** — see [CLAUDE.md](CLAUDE.md) for the versioning scheme (major = phase completion, minor = a step within a phase, patch = a bug fix).
 
 **Changelog**
+- **1.2.0** — Phase 1 (`src/fish_extractor/`) code-complete and unit-tested: Grounded SAM 2 zero-shot fish detection/segmentation, the accept/flag QA gate, resumable per-image state, a human-review page for flagged images, and a `--run`-gated CLI (mirrors `dataset_builder`'s `--scrape-web` pattern — no model loads unless explicitly asked). Not yet run against the real dataset — that needs Colab's GPU and is the actual Phase 1 completion event. Also added a working Phase 2 prototype (`src/pattern_extractor/`): coloring/stripe/spot feature extraction from `fish_extractor`'s output, built around a Python reimplementation of *patternize*'s (Van Belleghem et al. 2018) reference-initialized k-means colour-clustering method — see Planned Approach below for the full citation and how this differs from the original R package. Two rounds of independent code review caught and fixed real bugs before either lands: a missing file extension that would have silently skipped `.webp` images, a non-deterministic clustering seed, a stripe-periodicity check that was blind to same-luminance/different-hue stripes, an unguarded crash path on degenerate (near-solid-colour or empty-mask) images, and a dead config field. 106 tests passing.
 - **1.1.0** — Literature review completed for the candidate-genetics/methodology groundwork behind the pattern-extraction and phylogenetic-comparison design (see [BACKGROUND.md](BACKGROUND.md)): 56 NCBI-validated candidate genes across the coloring/stripes/spots dimensions (`data/genes/`), sourced from five papers on zebrafish, spotted scat, medaka, and mammalian pigmentation genetics — developmental corroboration for treating the three pattern dimensions as separable, not just an engineering convenience. Also surfaced a Mantel-test methodology correction (Harmon & Glor 2010): phylogenetic permutation, not naive permutation, and a null result must be reported as inconclusive rather than as evidence of no association — both folded into the Phase 4 plan. Separately, queried NCBI for genome-assembly availability across the 64 species (`data/genome_assemblies/`): 16/64 (25%) have a public assembly. Metadata only, no sequence downloaded — this is groundwork for a later, contingent phase, not new pipeline code.
 - **1.0.0** — Phase 0 (data collection) complete. ~1,850 candidate images sourced from GBIF across all 64 species, visually reviewed over 9 rounds (~490 images rejected and backfilled along the way). 55/64 species reached the 25-image target; the remaining 9 are genuinely limited by GBIF's available licensed photos, not a pipeline gap. Along the way: fixed a Windows encoding crash, a filename-numbering bug (with a cleanup pass over the existing dataset), and confirmed automated close-up/background filtering isn't reliable enough to replace human review.
 
@@ -32,7 +33,7 @@ Nothing in this README describes final scientific results yet — that section g
 
 ## Species
 
-63 species across all six extant Acanthuridae genera, sourced from lateral reference photographs:
+64 species across all six extant Acanthuridae genera, sourced from lateral reference photographs:
 
 | Genus | Species count |
 |---|---|
@@ -67,13 +68,13 @@ Full detail, including the reasoning behind each of these choices, is in [CLAUDE
 
 ## Planned Approach
 
-1. **Fish identification & extraction** (`src/fish_extractor/`, in progress) — Grounded SAM 2 (Grounding DINO zero-shot text-prompted detection + SAM 2.1 segmentation) identifies whether an image shows exactly one, roughly-centered fish and, if so, extracts it as a mask-cutout crop. No training required; anything ambiguous is routed to a human-reviewable page rather than silently accepted or dropped.
-2. **Pattern extraction** — three independent classical-CV extractors run on the fish-extractor's output: coloring (dominant-color clustering), stripes (Gabor/FFT periodicity), spots/freckles (blob detection). Kept separate rather than one blended feature vector, because these are developmentally distinct pattern-generating mechanisms (see [BACKGROUND.md](BACKGROUND.md)) — a claim independently corroborated by the candidate-gene literature review (`data/genes/`), not just an engineering choice.
+1. **Fish identification & extraction** (`src/fish_extractor/`, code-complete, pending a real Colab/GPU run) — Grounded SAM 2 (Grounding DINO zero-shot text-prompted detection + SAM 2.1 segmentation) identifies whether an image shows exactly one, roughly-centered fish and, if so, extracts it as a mask-cutout crop. No training required; anything ambiguous is routed to a human-reviewable page rather than silently accepted or dropped.
+2. **Pattern extraction** (`src/pattern_extractor/`, working prototype) — three independent feature extractors run on the fish-extractor's output: coloring (dominant-colour clustering), spots/freckles (connected-component blob shape), stripes (region elongation + per-channel FFT periodicity along the body axes). Kept separate rather than one blended feature vector, because these are developmentally distinct pattern-generating mechanisms (see [BACKGROUND.md](BACKGROUND.md)) — corroborated by the candidate-gene literature review (`data/genes/`), not just an engineering choice. The colour-clustering step is a Python reimplementation of *patternize*'s reference-initialized k-means method (Van Belleghem, S., Papa, R., Planas, S., Martin, S. H., Counterman, B. A., & Jiggins, C. D. (2018). patternize: An R package for quantifying colour pattern variation. *Methods in Ecology and Evolution*, 9(2), 390–398. https://doi.org/10.1111/2041-210X.12853), the closest published, peer-reviewed method for this task — demonstrated on fish and used for phylogenetic comparative colour-pattern studies. Two deliberate departures from the original, both because this study compares 64 different species rather than variation within one: no cross-specimen pixel registration (patternize's homology step assumes a broadly consistent body plan), and the stripe/spot geometry analysis is this project's own extension on top of patternize's colour-region output, not a capability patternize itself provides.
 3. **Distance matrices** — three separate species x species visual-distance matrices (one per pattern dimension), plus one patristic-distance matrix from the molecular tree.
 4. **Statistical test** — three Mantel tests (one per pattern dimension) compare each visual-distance matrix against the phylogenetic-distance matrix, using **phylogenetic permutation** (not naive permutation — see Harmon & Glor 2010, cited in BACKGROUND.md) and a multiple-comparisons correction across the three tests before anything is called significant. A null result is reported as inconclusive, not as evidence of no association — the Mantel test's power limitations mean absence of significance isn't evidence of absence.
-5. **(Contingent, deferred)** If any pattern dimension shows a significant, corrected result: investigate whether the 56 candidate genes identified in the literature review (`data/genes/`) are present/annotated in the genome assemblies available for 16 of the 64 species (`data/genome_assemblies/`), and whether any expression data can be found. Not yet scoped in detail — see `todo.txt`.
+5. **(Contingent, deferred)** If any pattern dimension shows a significant, corrected result: investigate whether the 56 candidate genes identified in the literature review (`data/genes/`) are present/annotated in the genome assemblies available for 16 of the 64 species (`data/genome_assemblies/`), and whether any expression data can be found. Not yet scoped in detail.
 
-Implementation details (exact feature set, split strategy for validating pattern extraction) are being finalized as each stage is rebuilt.
+Implementation details (exact feature set, split strategy for validating pattern extraction against manually labeled ground truth) are being finalized as each stage is rebuilt.
 
 ---
 
@@ -104,19 +105,21 @@ Surgeonfish_Neural_Network_Phylogenetics/
 │   └── review.html                    # Human visual-review page (keep/reject)
 ├── src/
 │   ├── dataset_builder/               # GBIF sourcing pipeline (see its docstring)
-│   └── fish_extractor/                # Fish identification & extraction (in progress)
+│   ├── fish_extractor/                # Fish identification & extraction (code-complete)
+│   └── pattern_extractor/             # Coloring/stripe/spot feature extraction (prototype)
 ├── tests/
 │   ├── dataset_builder/
-│   └── fish_extractor/
+│   ├── fish_extractor/
+│   └── pattern_extractor/
 ├── BACKGROUND.md                      # Candidate-gene / pattern-genetics literature review
 ├── LICENSE
 └── README.md
 ```
 
-Everything else (extracted-pattern features, distance matrices, phylogenetic analysis, and the scripts that produce them) will be added back stage by stage.
+Everything else (distance matrices, phylogenetic analysis, and the scripts that produce them) will be added back stage by stage.
 
 ---
 
 ## Acknowledgements
 
-This project is conducted in the **Dornburg Lab** at the University of North Carolina Charlotte. Phylogenetic reference data are obtained from the Fish Tree of Life (fishtreeoflife.org). Training and computation are performed on the UNC Charlotte HPC cluster.
+This project is conducted in the **Dornburg Lab** at the University of North Carolina Charlotte. Phylogenetic reference data are obtained from the Fish Tree of Life (fishtreeoflife.org). GPU computation (fish detection/segmentation) runs on Google Colab; the Phase 2 pattern-extraction methodology is a Python reimplementation of *patternize* (Van Belleghem et al. 2018) — see Planned Approach for the full citation.

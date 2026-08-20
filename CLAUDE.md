@@ -6,7 +6,7 @@ Project-specific context for the Surgeonfish Visual Phenomics and Phylogenetic I
 
 Before each implementation/commit, ask whether it's a **major**, **minor**, or **patch** change:
 
-- **Major** — completion of a full rebuild phase (Phase 0 data collection, Phase 1 standardization, Phase 2 annotation, etc.).
+- **Major** — completion of a full rebuild phase (Phase 0 data collection, Phase 1 fish identification & extraction, Phase 2 pattern extraction, Phase 3 distance matrices, Phase 4 phylogenetic comparison, etc. — see README.md's Planned Approach for the current phase list).
 - **Minor** — a fix or discrete step within a phase (e.g. adding the review-page loop, fixing the numbering bug, adding retry logic).
 - **Patch** — a bug fix that doesn't add a step, just corrects one.
 
@@ -30,14 +30,14 @@ Images are sourced programmatically via `src/dataset_builder/` (see its module d
 
 **Phase gate:** run the full `pytest` suite after implementing each rebuild phase, before considering that phase done — not just once at the end. This project has already shipped one silently-broken metric; catching a regression at the phase boundary it was introduced in, rather than several phases later, is the entire point.
 
-There is no frontend in this project — it is a command-line research pipeline run on an HPC cluster, not an application with a UI.
+There is no frontend in this project — it is a command-line research pipeline, not an application with a UI.
 
 ## Code conventions
 
-Python for the entire pipeline (image standardization, segmentation, feature extraction, distance matrices, phylogenetic statistics), run on the UNC Charlotte HPC cluster via SLURM.
+Python for the entire pipeline (fish detection/segmentation, pattern feature extraction, distance matrices, phylogenetic statistics). GPU-dependent stages (currently `fish_extractor`'s Grounded SAM 2 detection/segmentation) run on Google Colab, not a local machine or HPC/SLURM cluster — code is written as plain importable Python (testable locally on CPU-only logic with the model calls mocked out) so the same functions run identically from a script or a Colab cell.
 
-- **Dataclass-based configuration** — pipeline stage parameters (Mask R-CNN training hyperparameters, feature-extraction settings, Mantel test permutation counts) as `@dataclass`, not raw module-level constants or dicts.
-- **Pipeline classes with incremental state tracking** — each stage (standardize → annotate → split → train → evaluate → extract features → build distance matrices → compare to phylogeny) should track what it has already processed, so re-running a stage doesn't silently reprocess or duplicate outputs.
+- **Dataclass-based configuration** — pipeline stage parameters (detection/segmentation thresholds, QA-gate thresholds, feature-extraction settings, Mantel test permutation counts) as `@dataclass`, not raw module-level constants or dicts.
+- **Pipeline classes with incremental state tracking** — each stage (collect data → identify/extract fish → extract pattern features → build distance matrices → compare to phylogeny) should track what it has already processed, so re-running a stage doesn't silently reprocess or duplicate outputs. Exception: stages that are fast, deterministic, and local (no network/GPU calls) may skip this and simply recompute in full on re-run, if documented — see `pattern_extractor/pipeline.py`'s module docstring for the reasoning.
 - **Per-module logging** — `logging.getLogger(__name__)` per module, not a shared root logger.
 - **Docstrings** — every module, class, and function gets a Google-style docstring (`Args:` / `Returns:`, plus `Raises:` where relevant). This matters especially for anything computing a metric or statistic — the docstring is what keeps the *actual* definition of a number legible, given this pipeline has already had one metric silently mean something other than its name claimed.
 - **Ruff**: rules `E, F, I, W`, 100-char line limit.
