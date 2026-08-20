@@ -1,0 +1,25 @@
+in_our_64_species,our_species_folder,ncbi_organism_name,common_name,accession,assembly_level,refseq_category,release_date,submitter,bioproject_accession,total_sequence_length_bp,source_database
+yes,Acanthurus/Acanthurus_chirurgus,Acanthurus chirurgus,doctorfish,GCA_055796265.1,Chromosome,reference genome,2026-03-11,The George Washington University,PRJNA1430673,649277526,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_chirurgus,Acanthurus chirurgus,doctorfish,GCA_055796255.1,Chromosome,,2026-03-11,The George Washington University,PRJNA1430672,654468587,SOURCE_DATABASE_GENBANK
+no,,Acanthurus coeruleus,blue tang surgeonfish,GCA_977062895.1,Chromosome,reference genome,2025-11-15,Genoscope,PRJEB100955,660698797,SOURCE_DATABASE_GENBANK
+no,,Acanthurus coeruleus,blue tang surgeonfish,GCA_029814675.1,Scaffold,,2023-04-18,Iridian Genomes,PRJNA913853,726740695,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_grammoptilus,Acanthurus grammoptilus,finelined surgeonfish,GCA_029814705.1,Scaffold,reference genome,2023-04-18,Iridian Genomes,PRJNA913854,583990304,SOURCE_DATABASE_GENBANK
+no,,Acanthurus leucopareius,,GCA_029814765.1,Scaffold,reference genome,2023-04-18,Iridian Genomes,PRJNA913855,642241911,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_lineatus,Acanthurus lineatus,lined surgeonfish,GCA_029814665.1,Scaffold,reference genome,2023-04-18,Iridian Genomes,PRJNA913878,641975250,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_nigricauda,Acanthurus nigricauda,epaulette surgeonfish,GCA_029814725.1,Scaffold,reference genome,2023-04-18,Iridian Genomes,PRJNA913877,730195458,SOURCE_DATABASE_GENBANK
+no,,Acanthurus reversus,,GCA_029823135.1,Scaffold,reference genome,2023-04-18,Iridian Genomes,PRJNA905457,1668418491,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_tennentii,Acanthurus tennentii,doubleband surgeonfish,GCA_029783805.1,Scaffold,reference genome,2023-04-17,Iridian Genomes,PRJNA913876,709716676,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_tractus,Acanthurus tractus,fiveband surgeonfish,GCA_980438365.1,Chromosome,reference genome,2026-02-20,Genoscope,PRJEB106297,650160964,SOURCE_DATABASE_GENBANK
+yes,Acanthurus/Acanthurus_tractus,Acanthurus tractus,fiveband surgeonfish,GCA_029783725.1,Scaffold,,2023-04-17,Iridian Genomes,PRJNA913875,712347717,SOURCE_DATABASE_GENBANK
+yes,Ctenochaetus/Ctenochaetus_hawaiiensis,Ctenochaetus hawaiiensis,,GCA_029783645.1,Scaffold,reference genome,2023-04-17,Iridian Genomes,PRJNA913873,668129798,SOURCE_DATABASE_GENBANK
+yes,Ctenochaetus/Ctenochaetus_striatus,Ctenochaetus striatus,striated surgeonfish,GCA_034780835.1,Scaffold,reference genome,2023-12-28,Iridian Genomes,PRJNA913871,674711947,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_annulatus,Naso annulatus,whitemargin unicornfish,GCA_029783625.1,Scaffold,reference genome,2023-04-17,Iridian Genomes,PRJNA913870,848552395,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_brachycentron,Naso brachycentron,humpback unicornfish,GCA_029874485.1,Scaffold,reference genome,2023-04-26,Iridian Genomes,PRJNA916860,828406833,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_brevirostris,Naso brevirostris,spotted unicornfish,GCA_029874835.1,Scaffold,reference genome,2023-04-26,Iridian Genomes,PRJNA916861,820199528,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_lituratus,Naso lituratus,orangespine unicornfish,GCA_051996395.1,Scaffold,reference genome,2025-08-13,Fish10K,PRJNA1209848,655373137,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_minor,Naso minor,slender unicorn,GCA_029874875.1,Scaffold,reference genome,2023-04-26,Iridian Genomes,PRJNA916862,1011060766,SOURCE_DATABASE_GENBANK
+no,,Naso thynnoides,oneknife unicornfish,GCA_029783665.1,Scaffold,reference genome,2023-04-17,Iridian Genomes,PRJNA913869,804893255,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_vlamingii,Naso vlamingii,bignose unicornfish,GCA_051996375.1,Scaffold,reference genome,2025-08-13,Fish10K,PRJNA1209848,857502570,SOURCE_DATABASE_GENBANK
+yes,Naso/Naso_vlamingii,Naso vlamingii,bignose unicornfish,GCA_029822935.1,Scaffold,,2023-04-18,Iridian Genomes,PRJNA905459,899556458,SOURCE_DATABASE_GENBANK
+yes,Zebrasoma/Zebrasoma_flavescens,Zebrasoma flavescens,yellow tang,GCA_051996275.1,Scaffold,reference genome,2025-08-13,Fish10K,PRJNA1209848,680353956,SOURCE_DATABASE_GENBANK
+yes,Zebrasoma/Zebrasoma_veliferum,Zebrasoma velifer,sailfin tang,GCA_051996255.1,Scaffold,reference genome,2025-08-13,Fish10K,PRJNA1209848,680307738,SOURCE_DATABASE_GENBANK

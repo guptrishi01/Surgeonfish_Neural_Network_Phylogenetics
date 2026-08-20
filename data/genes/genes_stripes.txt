@@ -1,0 +1,23 @@
+CANDIDATE GENES — STRIPES DIMENSION
+Acanthuridae visual-pattern / phylogeny study
+7 genes; all validated against NCBI Gene
+==============================================================================
+
+Columns: gene | NCBI symbol | zebrafish mutant locus | confidence | source(s)
+------------------------------------------------------------------------------
+kcnj13       | kcnj13     | jaguar; obelix         | high     | Podobnik 2020; Podobnik 2020 suppl
+gja5b        | gja5b      | leopard                | high     | Podobnik 2020; Podobnik 2020 suppl
+mpv17        | mpv17      | transparent            | high     | Podobnik 2020; Podobnik 2020 suppl; Russo 2022
+agrp2        | asip2b     | -                      | high     | Luo 2021; Podobnik 2020
+ednrba       | ednrba     | rose                   | high     | Luo 2021; Podobnik 2020
+asip1        | asip1      | -                      | moderate | Luo 2021
+aqp3a        | aqp3a      | -                      | moderate | Podobnik 2020
+
+------------------------------------------------------------------------------
+PLAIN GENE SYMBOL LIST (for pasting into enrichment / lookup tools):
+
+agrp2, aqp3a, asip1, ednrba, gja5b, kcnj13, mpv17
+
+NCBI SYMBOLS:
+
+aqp3a, asip1, asip2b, ednrba, gja5b, kcnj13, mpv17

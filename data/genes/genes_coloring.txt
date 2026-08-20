@@ -1,0 +1,68 @@
+CANDIDATE GENES — COLORING DIMENSION
+Acanthuridae visual-pattern / phylogeny study
+52 genes; all validated against NCBI Gene
+==============================================================================
+
+Columns: gene | NCBI symbol | zebrafish mutant locus | confidence | source(s)
+------------------------------------------------------------------------------
+kcnj13       | kcnj13     | jaguar; obelix         | high     | Podobnik 2020; Podobnik 2020 suppl
+mitf         | MITF       | -                      | high     | Lin 2021; Luo 2021; Russo 2022
+sox10        | sox10      | -                      | high     | Lin 2021; Luo 2021; Russo 2022
+csf1ra       | csf1ra     | pfeffer                | high     | Luo 2021; Podobnik 2020; Podobnik 2020 suppl
+mitfa        | mitfa      | nacre                  | high     | Luo 2021; Podobnik 2020; Podobnik 2020 suppl; Russo 2022
+tyr          | tyr        | -                      | high     | Lin 2021; Luo 2021
+tyrp1        | tyrp1b     | -                      | high     | Lin 2021; Luo 2021
+mpv17        | mpv17      | transparent            | high     | Podobnik 2020; Podobnik 2020 suppl; Russo 2022
+kita         | kita       | sparse                 | high     | Luo 2021; Russo 2022
+mc1r         | mc1r       | -                      | high     | Luo 2021
+pax3         | PAX3       | -                      | high     | Lin 2021; Luo 2021
+dct          | dct        | -                      | high     | Lin 2021; Luo 2021
+pmel         | PMEL       | -                      | high     | Lin 2021; Luo 2021
+slc24a5      | slc24a5    | golden                 | high     | Luo 2021
+agrp2        | asip2b     | -                      | high     | Luo 2021; Podobnik 2020
+ednrba       | ednrba     | rose                   | high     | Luo 2021; Podobnik 2020
+foxd3        | foxd3      | -                      | high     | Luo 2021
+gch          | gch2       | -                      | high     | Luo 2021
+oca2         | oca2       | -                      | high     | Luo 2021; Russo 2022
+pmel17       | pmela      | -                      | high     | Lin 2021; Luo 2021
+asip         | ASIP       | -                      | moderate | Luo 2021
+asip1        | asip1      | -                      | moderate | Luo 2021
+mlana        | mlana      | -                      | moderate | Lin 2021
+pax7         | PAX7       | -                      | moderate | Luo 2021
+scarb1       | scarb1     | -                      | moderate | Luo 2021
+slc7a11      | slc7a11    | -                      | moderate | Luo 2021
+slc7a2       | slc7a2     | -                      | moderate | Lin 2021
+lef1         | lef1       | -                      | moderate | Luo 2021
+wnt1         | wnt1       | -                      | moderate | Luo 2021
+wnt3a        | wnt3a      | -                      | moderate | Luo 2021
+bace2        | bace2      | -                      | moderate | Podobnik 2020
+bco2         | BCO2       | -                      | moderate | Luo 2021
+bco2a        | bco2a      | -                      | moderate | Luo 2021
+csf1         | CSF1       | -                      | moderate | Podobnik 2020
+edn3         | EDN3       | -                      | moderate | Podobnik 2020
+edn3b        | edn3b      | -                      | moderate | Podobnik 2020
+egfra        | egfra      | -                      | moderate | Luo 2021
+egfrb        | egfrb      | -                      | moderate | Luo 2021
+erbb3        | ERBB3      | -                      | moderate | Luo 2021
+hps5         | hps5       | -                      | moderate | Russo 2022
+kitlg        | KITLG      | -                      | moderate | Luo 2021
+lrmda        | lrmda      | -                      | moderate | Russo 2022
+mir429       | MIR429     | -                      | moderate | Luo 2021
+mitfb        | mitfb      | -                      | moderate | Luo 2021
+pax7a        | pax7a      | -                      | moderate | Luo 2021
+pax7b        | pax7b      | -                      | moderate | Luo 2021
+ret          | ret        | -                      | moderate | Luo 2021
+spr          | SPR        | -                      | moderate | Luo 2021
+spra         | spra       | -                      | moderate | Luo 2021
+sprb         | sprb       | -                      | moderate | Luo 2021
+sws1         | opn1sw1    | -                      | moderate | Luo 2021
+xdh          | xdh        | -                      | moderate | Luo 2021
+
+------------------------------------------------------------------------------
+PLAIN GENE SYMBOL LIST (for pasting into enrichment / lookup tools):
+
+agrp2, asip, asip1, bace2, bco2, bco2a, csf1, csf1ra, dct, edn3, edn3b, ednrba, egfra, egfrb, erbb3, foxd3, gch, hps5, kcnj13, kita, kitlg, lef1, lrmda, mc1r, mir429, mitf, mitfa, mitfb, mlana, mpv17, oca2, pax3, pax7, pax7a, pax7b, pmel, pmel17, ret, scarb1, slc24a5, slc7a11, slc7a2, sox10, spr, spra, sprb, sws1, tyr, tyrp1, wnt1, wnt3a, xdh
+
+NCBI SYMBOLS:
+
+ASIP, BCO2, CSF1, EDN3, ERBB3, KITLG, MIR429, MITF, PAX3, PAX7, PMEL, SPR, asip1, asip2b, bace2, bco2a, csf1ra, dct, edn3b, ednrba, egfra, egfrb, foxd3, gch2, hps5, kcnj13, kita, lef1, lrmda, mc1r, mitfa, mitfb, mlana, mpv17, oca2, opn1sw1, pax7a, pax7b, pmela, ret, scarb1, slc24a5, slc7a11, slc7a2, sox10, spra, sprb, tyr, tyrp1b, wnt1, wnt3a, xdh

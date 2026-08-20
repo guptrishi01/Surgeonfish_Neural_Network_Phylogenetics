@@ -2,9 +2,10 @@
 
 ## Version
 
-**1.0.0** — see [CLAUDE.md](CLAUDE.md) for the versioning scheme (major = phase completion, minor = a step within a phase, patch = a bug fix).
+**1.1.0** — see [CLAUDE.md](CLAUDE.md) for the versioning scheme (major = phase completion, minor = a step within a phase, patch = a bug fix).
 
 **Changelog**
+- **1.1.0** — Literature review completed for the candidate-genetics/methodology groundwork behind the pattern-extraction and phylogenetic-comparison design (see [BACKGROUND.md](BACKGROUND.md)): 56 NCBI-validated candidate genes across the coloring/stripes/spots dimensions (`data/genes/`), sourced from five papers on zebrafish, spotted scat, medaka, and mammalian pigmentation genetics — developmental corroboration for treating the three pattern dimensions as separable, not just an engineering convenience. Also surfaced a Mantel-test methodology correction (Harmon & Glor 2010): phylogenetic permutation, not naive permutation, and a null result must be reported as inconclusive rather than as evidence of no association — both folded into the Phase 4 plan. Separately, queried NCBI for genome-assembly availability across the 64 species (`data/genome_assemblies/`): 16/64 (25%) have a public assembly. Metadata only, no sequence downloaded — this is groundwork for a later, contingent phase, not new pipeline code.
 - **1.0.0** — Phase 0 (data collection) complete. ~1,850 candidate images sourced from GBIF across all 64 species, visually reviewed over 9 rounds (~490 images rejected and backfilled along the way). 55/64 species reached the 25-image target; the remaining 9 are genuinely limited by GBIF's available licensed photos, not a pipeline gap. Along the way: fixed a Windows encoding crash, a filename-numbering bug (with a cleanup pass over the existing dataset), and confirmed automated close-up/background filtering isn't reliable enough to replace human review.
 
 This section will be trimmed down once the project is finished — for now it's tracking everything as it happens.
@@ -66,12 +67,13 @@ Full detail, including the reasoning behind each of these choices, is in [CLAUDE
 
 ## Planned Approach
 
-1. **Segmentation** — a Mask R-CNN model (ResNet-50 FPN backbone) isolates each fish from its background, producing a pixel mask per image.
-2. **Feature extraction** — a classical computer-vision feature vector (color histograms, dominant colors, dorsal-ventral color gradient, texture) is computed from within each mask only, excluding background.
-3. **Distance matrices** — pairwise visual distance between species (from features) and pairwise patristic distance between species (from the molecular tree) are each assembled into a distance matrix.
-4. **Statistical test** — a Mantel test compares the two matrices to determine whether visual similarity and phylogenetic relatedness are significantly correlated, with permutation-based significance testing.
+1. **Fish identification & extraction** (`src/fish_extractor/`, in progress) — Grounded SAM 2 (Grounding DINO zero-shot text-prompted detection + SAM 2.1 segmentation) identifies whether an image shows exactly one, roughly-centered fish and, if so, extracts it as a mask-cutout crop. No training required; anything ambiguous is routed to a human-reviewable page rather than silently accepted or dropped.
+2. **Pattern extraction** — three independent classical-CV extractors run on the fish-extractor's output: coloring (dominant-color clustering), stripes (Gabor/FFT periodicity), spots/freckles (blob detection). Kept separate rather than one blended feature vector, because these are developmentally distinct pattern-generating mechanisms (see [BACKGROUND.md](BACKGROUND.md)) — a claim independently corroborated by the candidate-gene literature review (`data/genes/`), not just an engineering choice.
+3. **Distance matrices** — three separate species x species visual-distance matrices (one per pattern dimension), plus one patristic-distance matrix from the molecular tree.
+4. **Statistical test** — three Mantel tests (one per pattern dimension) compare each visual-distance matrix against the phylogenetic-distance matrix, using **phylogenetic permutation** (not naive permutation — see Harmon & Glor 2010, cited in BACKGROUND.md) and a multiple-comparisons correction across the three tests before anything is called significant. A null result is reported as inconclusive, not as evidence of no association — the Mantel test's power limitations mean absence of significance isn't evidence of absence.
+5. **(Contingent, deferred)** If any pattern dimension shows a significant, corrected result: investigate whether the 56 candidate genes identified in the literature review (`data/genes/`) are present/annotated in the genome assemblies available for 16 of the 64 species (`data/genome_assemblies/`), and whether any expression data can be found. Not yet scoped in detail — see `todo.txt`.
 
-Implementation details (exact feature set, model hyperparameters, split strategy, and how feature-group selection avoids circularity) are being finalized as each stage is rebuilt.
+Implementation details (exact feature set, split strategy for validating pattern extraction) are being finalized as each stage is rebuilt.
 
 ---
 
@@ -80,28 +82,38 @@ Implementation details (exact feature set, model hyperparameters, split strategy
 ```
 Surgeonfish_Neural_Network_Phylogenetics/
 ├── data/
-│   └── raw_images/                    # One subfolder per species, one per genus
-│       ├── Acanthurus/
-│       │   └── Acanthurus_guttatus/
-│       │       ├── 000_reference.jpg  # Pre-existing curated photo (seed image)
-│       │       └── 001_gbif_....jpg   # GBIF-sourced, license-checked, reviewed
-│       ├── Ctenochaetus/
-│       ├── Naso/
-│       ├── Paracanthurus/
-│       ├── Prionurus/
-│       └── Zebrasoma/
+│   ├── raw_images/                    # One subfolder per species, one per genus
+│   │   ├── Acanthurus/
+│   │   │   └── Acanthurus_guttatus/
+│   │   │       ├── 000_reference.jpg  # Pre-existing curated photo (seed image)
+│   │   │       └── 001_gbif_....jpg   # GBIF-sourced, license-checked, reviewed
+│   │   ├── Ctenochaetus/
+│   │   ├── Naso/
+│   │   ├── Paracanthurus/
+│   │   ├── Prionurus/
+│   │   └── Zebrasoma/
+│   ├── genes/                         # Candidate-gene lists from the literature review
+│   │   ├── genes_coloring.txt
+│   │   ├── genes_stripes.txt
+│   │   └── genes_spots.txt
+│   └── genome_assemblies/             # NCBI assembly-availability search (metadata only)
+│       ├── manifest.csv
+│       └── README.md
 ├── reports/
 │   ├── image_sourcing_log.csv         # Per-image source URL, license, attribution
 │   └── review.html                    # Human visual-review page (keep/reject)
 ├── src/
-│   └── dataset_builder/               # GBIF sourcing pipeline (see its docstring)
+│   ├── dataset_builder/               # GBIF sourcing pipeline (see its docstring)
+│   └── fish_extractor/                # Fish identification & extraction (in progress)
 ├── tests/
-│   └── dataset_builder/
+│   ├── dataset_builder/
+│   └── fish_extractor/
+├── BACKGROUND.md                      # Candidate-gene / pattern-genetics literature review
 ├── LICENSE
 └── README.md
 ```
 
-Everything else (standardized images, annotations, trained model, extracted features, distance matrices, phylogenetic analysis, and the scripts that produce them) will be added back stage by stage.
+Everything else (extracted-pattern features, distance matrices, phylogenetic analysis, and the scripts that produce them) will be added back stage by stage.
 
 ---
 

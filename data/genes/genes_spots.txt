@@ -1,0 +1,21 @@
+CANDIDATE GENES — SPOTS / FRECKLES DIMENSION
+Acanthuridae visual-pattern / phylogeny study
+5 genes; all validated against NCBI Gene
+==============================================================================
+
+Columns: gene | NCBI symbol | zebrafish mutant locus | confidence | source(s)
+------------------------------------------------------------------------------
+gja5b        | gja5b      | leopard                | high     | Podobnik 2020; Podobnik 2020 suppl
+igsf11       | igsf11     | seurat                 | high     | Podobnik 2020; Podobnik 2020 suppl
+tyrp1        | tyrp1b     | -                      | high     | Lin 2021; Luo 2021
+gja4         | gja4       | luchs                  | high     | Podobnik 2020; Podobnik 2020 suppl
+mlana        | mlana      | -                      | moderate | Lin 2021
+
+------------------------------------------------------------------------------
+PLAIN GENE SYMBOL LIST (for pasting into enrichment / lookup tools):
+
+gja4, gja5b, igsf11, mlana, tyrp1
+
+NCBI SYMBOLS:
+
+gja4, gja5b, igsf11, mlana, tyrp1b
