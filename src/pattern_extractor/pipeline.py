@@ -30,7 +30,7 @@ from pattern_extractor.stripe import extract_stripe_features
 logger = logging.getLogger(__name__)
 
 _FIELDNAMES = [
-    "image_key", "dominant_fraction", "is_solid", "n_significant_colors",
+    "image_key", "is_reference", "dominant_fraction", "is_solid", "n_significant_colors",
     "spot_count", "mean_spot_area", "spot_present",
     "elongated_region_count", "periodicity_strength", "stripe_present",
 ]
@@ -115,7 +115,9 @@ class PatternExtractorPipeline:
                 logger.warning("No mask found for %s/%s, skipping image", species_dir, stem)
                 continue
             try:
-                row = self._process_image(species_dir, stem, loaded, reference_centers)
+                row = self._process_image(
+                    species_dir, stem, loaded, reference_centers, stem == reference_stem
+                )
             except ValueError:
                 logger.exception(
                     "Could not extract features for %s/%s, skipping image", species_dir, stem
@@ -130,8 +132,18 @@ class PatternExtractorPipeline:
         stem: str,
         loaded: tuple[np.ndarray, np.ndarray],
         reference_centers: np.ndarray,
+        is_reference: bool,
     ) -> dict:
-        """Clusters one image and extracts its color/spot/stripe feature row."""
+        """Clusters one image and extracts its color/spot/stripe feature row.
+
+        ``is_reference`` marks the per-species seed photo (``000_reference``,
+        a pre-existing curated image, distinct from the GBIF field photos
+        that make up the rest of a species' images). It is recorded but not
+        acted on here - Phase 2 writes one row per image, with no
+        per-species aggregation yet. Whichever stage builds that aggregation
+        (Phase 3) needs this flag to decide whether the reference image
+        belongs in a species' feature aggregate or should be held out.
+        """
         image, mask = loaded
         cluster_result = assign_clusters(image, mask, reference_centers, self._config.clustering)
         color = extract_color_features(cluster_result, self._config.color)
@@ -145,6 +157,7 @@ class PatternExtractorPipeline:
         ).replace("\\", "/")
         return {
             "image_key": image_key,
+            "is_reference": is_reference,
             "dominant_fraction": color.dominant_fraction,
             "is_solid": color.is_solid,
             "n_significant_colors": color.n_significant_colors,

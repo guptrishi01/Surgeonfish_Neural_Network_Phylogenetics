@@ -94,6 +94,19 @@ def test_species_filter_restricts_which_species_are_processed(tmp_path: Path):
     assert rows[0]["image_key"].startswith("Acanthurus/")
 
 
+def test_is_reference_flag_marks_only_the_reference_image(tmp_path: Path):
+    config = _config(tmp_path)
+    species_dir = config.extracted_root / "Acanthurus" / "Acanthurus_guttatus"
+    _save_pair(species_dir, "000_reference")
+    _save_pair(species_dir, "001_gbif_1")
+
+    rows = PatternExtractorPipeline(config).run()
+
+    by_key = {row["image_key"]: row["is_reference"] for row in rows}
+    assert by_key["Acanthurus/Acanthurus_guttatus/000_reference"] is True
+    assert by_key["Acanthurus/Acanthurus_guttatus/001_gbif_1"] is False
+
+
 def test_image_key_matches_relative_path_and_stem(tmp_path: Path):
     config = _config(tmp_path)
     _save_pair(config.extracted_root / "Acanthurus" / "Acanthurus_guttatus", "000_reference")

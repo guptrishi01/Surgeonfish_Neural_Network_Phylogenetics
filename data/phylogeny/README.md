@@ -65,6 +65,33 @@ Building a custom tree extension from raw GenBank sequence for these species
 is out of scope for now, but is a legitimate future option if the sample size
 becomes limiting.
 
+## Paraphyly-prediction check
+
+Sorenson et al. (2013) recover the *Acanthurus*/*Ctenochaetus* paraphyly specifically
+as *Ctenochaetus* nested with two named *Acanthurus* species, *A. nubilus* and
+*A. pyroferus* - not the genus as a whole. Both are confirmed present in the
+50-species matched set (`species_coverage.csv` rows: `Acanthurus nubilus,yes,exact`,
+`Acanthurus pyroferus,yes,exact`), so the README's Species-section prediction is
+testable as named, not merely as a genus-level proxy. Worth flagging alongside
+that good news: restricting to the 50 genetically-sampled species drops
+*Acanthurus* coverage from 79% (31/39 clean NCBI binomials) to 54% (21/39) -
+the lowest of any genus post-restriction, and the genus this prediction most
+depends on being well sampled around those two named species. See the main
+README's Species section for the corrected genus denominators
+(`data/genus_species_counts.json`).
+
+## Synonym-table authority caveat
+
+`acanthuridae_synonyms.json` was built from NCBI Taxonomy, which - like the
+per-genus species denominators above - is a sequence-database convenience, not
+a taxonomic authority for fishes. It currently gates one real match (*Zebrasoma
+veliferum*/*velifer*) that changes the reported coverage count. Cross-checking
+that specific match (and the synonym table generally) against a fish-specific
+authority such as FishBase (`rfishbase::synonyms()`) or Eschmeyer's Catalog of
+Fishes, and recording which authority decided each match, is an open follow-up
+- not done yet, so treat the 50/64 figure as NCBI-synonym-consistent rather than
+cross-validated against a fish taxonomic reference.
+
 ## Decision
 
 Phase 4 restricts the phylogenetic-distance side of the analysis to the 50

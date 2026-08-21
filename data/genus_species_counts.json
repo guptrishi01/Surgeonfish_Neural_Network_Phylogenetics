@@ -1,0 +1,68 @@
+{
+  "_description": "NCBI Taxonomy species-rank record counts per Acanthuridae genus, used as the denominator for the Species section's taxon-sampling percentages. Independently queried and hand-classified for this project (not taken from any audit tool's own count) - see 'excluded' for interspecific hybrids and provisional/BOLD placeholder names that carry NCBI Taxonomy rank=species but are not valid, describable binomial species.",
+  "_method": "esearch db=taxonomy term='<Genus>[Subtree] AND species[Rank]', then esummary on the returned IDs to classify each ScientificName as a real binomial vs. a hybrid/aff./cf./sp./BOLD placeholder.",
+  "_queried": "2026-08-20",
+  "_caveat": "NCBI Taxonomy is a sequence-database index, not a taxonomic authority for fishes - it will not perfectly match Eschmeyer's Catalog of Fishes or FishBase. Treat these as a reasonable, checkable denominator, not the final word.",
+  "Acanthurus": {
+    "all_species_rank": 52,
+    "clean_binomial": 39,
+    "excluded": [
+      "Acanthurus sp. 282-37_40R_7_18_17_5_M13F_2017-07-29_B08",
+      "Acanthurus sp. 281-37_40R_7_18_17_8_M13F_2017-07-29_E08",
+      "Acanthurus aff. chirurgus AC_8",
+      "Acanthurus lineatus x Acanthurus sohal",
+      "Acanthurus nigricans x Acanthurus japonicus",
+      "Acanthurus nigricans x Acanthurus achilles",
+      "Acanthurus sp. BOLD:AAB0201",
+      "Acanthurus sp. BOLD:AAB0262",
+      "Acanthurus sp. BOLD:AAA9314",
+      "Acanthurus nigricans x Acanthurus leucosternon",
+      "Acanthurus sp. BOLD:AAJ3093",
+      "Acanthurus cf. leucosternon LvH-2007",
+      "Acanthurus sp."
+    ]
+  },
+  "Ctenochaetus": {
+    "all_species_rank": 13,
+    "clean_binomial": 9,
+    "excluded": [
+      "Ctenochaetus sp.",
+      "Ctenochaetus sp. JP-2017",
+      "Ctenochaetus sp. BOLD:AAB9166",
+      "Ctenochaetus sp. BL-2008"
+    ]
+  },
+  "Naso": {
+    "all_species_rank": 24,
+    "clean_binomial": 20,
+    "excluded": [
+      "Naso sp.",
+      "Naso sp. ZS07TYC-L1",
+      "Naso sp. BOLD:AAC1635",
+      "Naso sp. 1-SOK-2003"
+    ]
+  },
+  "Paracanthurus": {
+    "all_species_rank": 1,
+    "clean_binomial": 1,
+    "excluded": []
+  },
+  "Prionurus": {
+    "all_species_rank": 7,
+    "clean_binomial": 7,
+    "excluded": []
+  },
+  "Zebrasoma": {
+    "all_species_rank": 10,
+    "clean_binomial": 7,
+    "excluded": [
+      "Zebrasoma sp. M0401_251",
+      "Zebrasoma sp. S0001_007",
+      "Zebrasoma sp. BOLD:AAB3787"
+    ]
+  },
+  "family_total": {
+    "all_species_rank": 107,
+    "clean_binomial": 83
+  }
+}
