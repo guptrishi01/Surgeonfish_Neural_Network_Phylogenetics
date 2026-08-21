@@ -1,0 +1,267 @@
+{
+ "synonyms": {
+  "Acanthurus maculiceps": [
+   "Hepatus maculiceps"
+  ],
+  "Acanthurus leucopareius": [
+   "Teuthis leucopareius"
+  ],
+  "Zebrasoma xanthurum": [
+   "Acanthurus xanthurus"
+  ],
+  "Acanthurus sohal": [
+   "Chaetodon sohal"
+  ],
+  "Acanthurus gahhm": [
+   "Chaetodon nigrofuscus gahhm"
+  ],
+  "Prionurus biafraensis": [
+   "Xesurus biafraensis"
+  ],
+  "Zebrasoma velifer": [
+   "Acanthurus velifer",
+   "Zebrasoma veliferum"
+  ],
+  "Zebrasoma desjardinii": [
+   "Acanthurus desjardinii"
+  ],
+  "Acanthurus polyzona": [
+   "Rhombotides polyzona"
+  ],
+  "Zebrasoma gemmatum": [
+   "Acanthurus gemmatus"
+  ],
+  "Zebrasoma rostratum": [
+   "Acanthurus rostratum",
+   "Acanthurus rostratus",
+   "Zebrasoma rostrata"
+  ],
+  "Acanthurus nigricauda": [
+   "Acanthurus gahm nigricauda"
+  ],
+  "Acanthurus achilles": [
+   "Hepatus achilles",
+   "Teuthis achilles"
+  ],
+  "Acanthurus bariene": [
+   "Hepatus bariene"
+  ],
+  "Ctenochaetus strigosus": [
+   "Acanthurus strigosus"
+  ],
+  "Acanthurus lineatus": [
+   "Chaetodon lineatus",
+   "Ctenodon lineatus",
+   "Harpurus lineatus",
+   "Hepatus lineatus",
+   "Rhombotides lineatus",
+   "Teuthis lineatus"
+  ],
+  "Acanthurus japonicus": [
+   "Hepatus aliala japonicus"
+  ],
+  "Ctenochaetus marginatus": [
+   "Acanthurus marginatus"
+  ],
+  "Naso vlamingii": [
+   "Naseus vlamingii"
+  ],
+  "Naso tonganus": [
+   "Naseus tonganus"
+  ],
+  "Naso thynnoides": [
+   "Axinurus thynnoides"
+  ],
+  "Naso minor": [
+   "Axinurus minor"
+  ],
+  "Naso elegans": [
+   "Aspisurus elegans"
+  ],
+  "Naso brevirostris": [
+   "Naseus brevirostris"
+  ],
+  "Naso annulatus": [
+   "Priodon annulatus"
+  ],
+  "Acanthurus nubilus": [
+   "Hepatus nubilus"
+  ],
+  "Naso unicornis": [
+   "Chaetodon unicornis"
+  ],
+  "Naso hexacanthus": [
+   "Priodon hexacanthus"
+  ],
+  "Naso brachycentron": [
+   "Naseus brachycentron"
+  ],
+  "Zebrasoma flavescens": [
+   "Acanthurus flavescens"
+  ],
+  "Prionurus laticlavius": [
+   "Naseus laticlavius"
+  ],
+  "Ctenochaetus striatus": [
+   "Acanthurus striatus"
+  ],
+  "Acanthurus triostegus": [
+   "Chaetodon triostegus"
+  ],
+  "Acanthurus thompsoni": [
+   "Hepatus thompsoni"
+  ],
+  "Acanthurus nigricans": [
+   "Chaetodon nigricans"
+  ],
+  "Acanthurus mata": [
+   "Chaetodon mata"
+  ],
+  "Zebrasoma scopas": [
+   "Acanthurus scopas"
+  ],
+  "Paracanthurus hepatus": [
+   "Teuthis hepatus"
+  ],
+  "Naso lituratus": [
+   "Acanthurus lituratus"
+  ],
+  "Acanthurus chirurgus": [
+   "Chaetodon chirurgus"
+  ],
+  "Acanthurus nigrofuscus": [
+   "Chaetodon nigrofuscus"
+  ]
+ },
+ "genus_differing": {
+  "Acanthurus maculiceps": [
+   "Hepatus maculiceps"
+  ],
+  "Acanthurus leucopareius": [
+   "Teuthis leucopareius"
+  ],
+  "Zebrasoma xanthurum": [
+   "Acanthurus xanthurus"
+  ],
+  "Acanthurus sohal": [
+   "Chaetodon sohal"
+  ],
+  "Acanthurus gahhm": [
+   "Chaetodon nigrofuscus gahhm"
+  ],
+  "Prionurus biafraensis": [
+   "Xesurus biafraensis"
+  ],
+  "Zebrasoma velifer": [
+   "Acanthurus velifer",
+   "Zebrasoma veliferum"
+  ],
+  "Zebrasoma desjardinii": [
+   "Acanthurus desjardinii"
+  ],
+  "Acanthurus polyzona": [
+   "Rhombotides polyzona"
+  ],
+  "Zebrasoma gemmatum": [
+   "Acanthurus gemmatus"
+  ],
+  "Zebrasoma rostratum": [
+   "Acanthurus rostratum",
+   "Acanthurus rostratus",
+   "Zebrasoma rostrata"
+  ],
+  "Acanthurus achilles": [
+   "Hepatus achilles",
+   "Teuthis achilles"
+  ],
+  "Acanthurus bariene": [
+   "Hepatus bariene"
+  ],
+  "Ctenochaetus strigosus": [
+   "Acanthurus strigosus"
+  ],
+  "Acanthurus lineatus": [
+   "Chaetodon lineatus",
+   "Ctenodon lineatus",
+   "Harpurus lineatus",
+   "Hepatus lineatus",
+   "Rhombotides lineatus",
+   "Teuthis lineatus"
+  ],
+  "Acanthurus japonicus": [
+   "Hepatus aliala japonicus"
+  ],
+  "Ctenochaetus marginatus": [
+   "Acanthurus marginatus"
+  ],
+  "Naso vlamingii": [
+   "Naseus vlamingii"
+  ],
+  "Naso tonganus": [
+   "Naseus tonganus"
+  ],
+  "Naso thynnoides": [
+   "Axinurus thynnoides"
+  ],
+  "Naso minor": [
+   "Axinurus minor"
+  ],
+  "Naso elegans": [
+   "Aspisurus elegans"
+  ],
+  "Naso brevirostris": [
+   "Naseus brevirostris"
+  ],
+  "Naso annulatus": [
+   "Priodon annulatus"
+  ],
+  "Acanthurus nubilus": [
+   "Hepatus nubilus"
+  ],
+  "Naso unicornis": [
+   "Chaetodon unicornis"
+  ],
+  "Naso hexacanthus": [
+   "Priodon hexacanthus"
+  ],
+  "Naso brachycentron": [
+   "Naseus brachycentron"
+  ],
+  "Zebrasoma flavescens": [
+   "Acanthurus flavescens"
+  ],
+  "Prionurus laticlavius": [
+   "Naseus laticlavius"
+  ],
+  "Ctenochaetus striatus": [
+   "Acanthurus striatus"
+  ],
+  "Acanthurus triostegus": [
+   "Chaetodon triostegus"
+  ],
+  "Acanthurus thompsoni": [
+   "Hepatus thompsoni"
+  ],
+  "Acanthurus nigricans": [
+   "Chaetodon nigricans"
+  ],
+  "Acanthurus mata": [
+   "Chaetodon mata"
+  ],
+  "Zebrasoma scopas": [
+   "Acanthurus scopas"
+  ],
+  "Paracanthurus hepatus": [
+   "Teuthis hepatus"
+  ],
+  "Naso lituratus": [
+   "Acanthurus lituratus"
+  ],
+  "Acanthurus chirurgus": [
+   "Chaetodon chirurgus"
+  ],
+  "Acanthurus nigrofuscus": [
+   "Chaetodon nigrofuscus"
+  ]
+ }
+}
