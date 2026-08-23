@@ -23,14 +23,23 @@ class Sam2Segmenter:
     def __init__(self, config: SegmentationConfig) -> None:
         self._config = config
         self._predictor = None
+        self._device = "cpu"
 
     def _ensure_loaded(self) -> None:
         if self._predictor is not None:
             return
+        import torch
         from sam2.sam2_image_predictor import SAM2ImagePredictor
 
-        logger.info("Loading SAM 2 model %s", self._config.model_id)
-        self._predictor = SAM2ImagePredictor.from_pretrained(self._config.model_id)
+        # sam2's own build_sam2() defaults device="cuda" unconditionally if
+        # not told otherwise, which crashes with AssertionError on a CPU-only
+        # torch build/runtime instead of falling back - detect and pass it
+        # explicitly, matching GroundingDinoDetector's behavior.
+        self._device = "cuda" if torch.cuda.is_available() else "cpu"
+        logger.info("Loading SAM 2 model %s on %s", self._config.model_id, self._device)
+        self._predictor = SAM2ImagePredictor.from_pretrained(
+            self._config.model_id, device=self._device
+        )
 
     def segment(self, image: "PILImage", box: Box) -> np.ndarray:  # noqa: F821
         """Produces a boolean fish/not-fish mask for one image.
