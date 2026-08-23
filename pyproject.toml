@@ -17,7 +17,11 @@ dependencies = [
 vision = [
     "torch",
     "torchvision",
-    "transformers>=4.44",
+    # >=4.51: GroundingDinoProcessor.post_process_grounded_object_detection's
+    # box-confidence kwarg is named `threshold` from here on (was
+    # `box_threshold`, removed entirely in 4.55) - detector.py calls it with
+    # the current name, so older transformers would raise a TypeError.
+    "transformers>=4.51",
     "sam2",
     "opencv-python",
     "accelerate",
