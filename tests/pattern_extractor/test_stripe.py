@@ -75,6 +75,34 @@ def test_solid_image_is_not_detected_as_stripe_present():
     assert features.elongated_region_count == 0
 
 
+def test_wide_elongated_region_is_not_counted_as_an_elongated_stripe_region():
+    # A region can score a high eccentricity just from spanning much of a
+    # naturally elongated fish silhouette - e.g. one smooth shading half of
+    # the body - without being a real stripe. Confirmed against a real
+    # diagnostic visualization: k-means splitting a genuinely solid-coloured
+    # Zebrasoma flavescens into shading bands produced exactly this shape
+    # (eccentricity ~0.95, minor-axis width far above a real stripe's) and
+    # was being misclassified as striped by eccentricity alone. This region
+    # is elongated but wide, so it must not count.
+    height, width = 400, 50
+    labels = np.array([0] * (240 * width) + [1] * (160 * width))  # top 60% / bottom 40%
+    mask_coords = (np.repeat(np.arange(height), width), np.tile(np.arange(width), height))
+    fractions = np.array([240 * width / (height * width), 160 * width / (height * width)])
+    cluster_result = ClusterResult(
+        centers=np.zeros((2, 3)),
+        labels=labels,
+        fractions=fractions,
+        mask_shape=(height, width),
+        mask_coords=mask_coords,
+    )
+    image = np.zeros((height, width, 3), dtype=np.uint8)
+    mask = np.ones((height, width), dtype=bool)
+
+    features = extract_stripe_features(image, mask, cluster_result, RegionConfig(), StripeConfig())
+
+    assert features.elongated_region_count == 0
+
+
 def test_empty_cluster_result_still_returns_valid_features():
     empty_result = ClusterResult(
         centers=np.zeros((0, 3)),

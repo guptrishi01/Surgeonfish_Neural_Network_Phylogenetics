@@ -30,12 +30,22 @@ class RegionStats:
             (line-like) shape.
         orientation_rad: Angle of the region's major axis, in radians,
             within [-pi/2, pi/2].
+        minor_axis_length: Full width of the region's minor axis
+            (``4 * sqrt(lambda2)``, the standard image-moment ellipse
+            convention - same formula skimage's regionprops uses). A wide
+            region can still score a high eccentricity if it's long enough
+            (e.g. one smooth shading half spanning most of a fish's body,
+            confirmed via a diagnostic visualization against real Phase 2
+            output - see StripeConfig.max_stripe_width_fraction), so
+            eccentricity alone doesn't distinguish "elongated" from
+            "narrow." This field lets callers require both.
     """
 
     area: int
     centroid: tuple[float, float]
     eccentricity: float
     orientation_rad: float
+    minor_axis_length: float
 
 
 def find_regions(binary_mask: np.ndarray, min_area: int = 1) -> list[RegionStats]:
@@ -83,12 +93,14 @@ def find_regions(binary_mask: np.ndarray, min_area: int = 1) -> list[RegionStats
         ratio = lambda2 / lambda1 if lambda1 > 1e-9 else 0.0
         eccentricity = min(math.sqrt(max(0.0, 1.0 - ratio)), 1.0)
         orientation = 0.5 * math.atan2(2 * mu11, mu20 - mu02)
+        minor_axis_length = 4 * math.sqrt(max(0.0, lambda2))
         regions.append(
             RegionStats(
                 area=area,
                 centroid=(row_mean, col_mean),
                 eccentricity=eccentricity,
                 orientation_rad=orientation,
+                minor_axis_length=minor_axis_length,
             )
         )
     return regions

@@ -107,6 +107,25 @@ class StripeConfig:
         min_elongated_region_count: At least this many elongated regions
             must be found for the image to be called "striped" by region
             shape alone.
+        max_stripe_width_fraction: A region's minor-axis width must be at
+            most this fraction of sqrt(total masked pixels) - a proxy for
+            the fish's characteristic size - to count as stripe-like.
+            Added after a diagnostic visualization against real Phase 1/2
+            output showed eccentricity alone couldn't tell a genuine thin
+            stripe band apart from one wide, smooth lighting/shading zone
+            spanning half a fish's body: both score high eccentricity
+            since the fish silhouette itself is elongated, so any region
+            covering roughly half of it inherits that elongation without
+            being a stripe. 0.08 is a reasoned interim value (a real
+            stripe band should be a small fraction of the fish's size,
+            not comparable to half the body) - not yet validated against
+            manually-labeled ground truth, same caveat as
+            RegionConfig.min_region_area_fraction. Known residual
+            confound this doesn't fix: fin rays are genuinely thin and
+            elongated, so they can still pass this check even though
+            they're fin anatomy, not a body colour pattern - the planned
+            60/20/20 validation split (see Planned Approach step 2) is
+            needed to catch that class of false positive.
         min_periodicity_strength: Minimum normalized FFT peak strength
             (of the masked region's intensity profile along its principal
             axis) to call the image "striped" by periodicity, independent
@@ -115,6 +134,7 @@ class StripeConfig:
 
     min_eccentricity_for_stripe: float = 0.9
     min_elongated_region_count: int = 2
+    max_stripe_width_fraction: float = 0.08
     min_periodicity_strength: float = 0.3
 
 

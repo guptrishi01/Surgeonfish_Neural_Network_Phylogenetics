@@ -6,6 +6,7 @@ see __init__.py for how this differs from patternize itself.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import numpy as np
@@ -20,15 +21,18 @@ class StripeFeatures:
     """Stripe-dimension features for one image.
 
     Attributes:
-        elongated_region_count: Number of elongated (stripe-like) regions
-            found across all non-dominant clusters.
+        elongated_region_count: Number of regions found across all
+            non-dominant clusters that are both elongated (high
+            eccentricity) and narrow (bounded minor-axis width relative to
+            the fish's size) - see StripeConfig.max_stripe_width_fraction
+            for why both checks are needed, not eccentricity alone.
         periodicity_strength: Normalized FFT peak strength of the fish
             region's intensity profile along its principal axis - high for
             a regularly repeating pattern (stripes), low for one solid
             block of colour or scattered spots.
         stripe_present: True if either signal clears its configured
             threshold - region-shape and periodicity are independent
-            checks, since a single very elongated band (one region) can
+            checks, since a single narrow elongated band (one region) can
             still be a real stripe pattern without strong periodicity.
     """
 
@@ -111,8 +115,13 @@ def extract_stripe_features(
         StripeFeatures for this image.
     """
     regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_fraction)
+    total_masked_pixels = len(cluster_result.mask_coords[0])
+    max_width = stripe_config.max_stripe_width_fraction * math.sqrt(total_masked_pixels)
     elongated_count = sum(
-        1 for region in regions if region.eccentricity >= stripe_config.min_eccentricity_for_stripe
+        1
+        for region in regions
+        if region.eccentricity >= stripe_config.min_eccentricity_for_stripe
+        and region.minor_axis_length <= max_width
     )
 
     periodicity = _periodicity_strength(image_rgb, mask)
