@@ -100,6 +100,22 @@ def _deduplicate(boxes: list[Box], iou_threshold: float) -> list[Box]:
     return kept
 
 
+def _drop_dominated_boxes(boxes: list[Box], min_area_ratio: float) -> list[Box]:
+    """Drops boxes much smaller than the largest one - background clutter, not a second fish.
+
+    A real second fish tends to be comparable in size to the first; a
+    disproportionately tiny box next to a large, confident one is far more
+    likely a spurious background detection (a distant fish, a fin, reef
+    texture) than a genuine second subject.
+    """
+    if not boxes:
+        return boxes
+    max_area = max(b.area for b in boxes)
+    if max_area <= 0:
+        return boxes
+    return [b for b in boxes if b.area / max_area >= min_area_ratio]
+
+
 def evaluate(
     boxes: list[Box],
     image_size: tuple[int, int],
@@ -120,6 +136,7 @@ def evaluate(
     """
     qualifying = [b for b in boxes if b.confidence >= config.min_confidence]
     qualifying = _deduplicate(qualifying, config.duplicate_iou_threshold)
+    qualifying = _drop_dominated_boxes(qualifying, config.min_secondary_box_area_ratio)
 
     if len(qualifying) == 0:
         return QAResult(

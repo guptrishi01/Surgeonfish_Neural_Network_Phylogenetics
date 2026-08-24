@@ -72,6 +72,19 @@ class QAGateConfig:
             overlap threshold (used by, e.g., torchvision's default IoU cut
             for duplicate suppression) - high enough that two boxes around
             genuinely different, non-overlapping fish won't be merged.
+        min_secondary_box_area_ratio: A qualifying box smaller than this
+            fraction of the *largest* qualifying box's area is dropped as
+            background clutter rather than counted as a second fish.
+            Empirically motivated: inspecting real "multiple_fish" flags
+            that survived deduplication showed a consistent pattern of one
+            large, high-confidence box (the actual subject, 20-30% of the
+            image) plus a small, non-overlapping, lower-confidence box
+            (under 14% of the *main box's* area in every case checked) -
+            almost certainly background clutter (a distant fish, a fin,
+            reef texture), not a genuine second subject. A real second fish
+            is typically comparable in size to the first, not a sliver of
+            it. 0.2 sits well above the observed clutter ratios while still
+            treating two similarly-sized boxes as two real fish.
     """
 
     min_confidence: float = 0.35
@@ -79,6 +92,7 @@ class QAGateConfig:
     min_box_area_fraction: float = 0.05
     max_box_area_fraction: float = 0.95
     duplicate_iou_threshold: float = 0.5
+    min_secondary_box_area_ratio: float = 0.2
 
 
 @dataclass

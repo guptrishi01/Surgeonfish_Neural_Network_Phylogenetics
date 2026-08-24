@@ -117,6 +117,37 @@ def test_near_duplicate_boxes_around_one_fish_are_deduplicated_and_accepted():
     assert result.box.confidence == 0.9  # the higher-confidence box of the pair was kept
 
 
+def test_tiny_secondary_box_is_dropped_as_clutter_and_accepted():
+    # One large, dominant, centered box plus a small, non-overlapping,
+    # lower-confidence box far smaller than it - the real pattern found in
+    # production "multiple_fish" flags that survived deduplication.
+    image_size = (1000, 800)
+    boxes = [
+        Box(x0=300, y0=200, x1=700, y1=600, confidence=0.85),  # main subject, area 160000
+        Box(x0=850, y0=700, x1=900, y1=750, confidence=0.4),  # clutter, area 2500 (1.6% of main)
+    ]
+
+    result = evaluate(boxes, image_size, _CONFIG)
+
+    assert result.status == "accepted"
+    assert result.box.confidence == 0.85
+
+
+def test_two_comparably_sized_boxes_are_not_dropped_as_clutter():
+    # Two boxes of similar size, non-overlapping - a real second fish should
+    # not be suppressed just because it's a bit smaller than the first.
+    image_size = (1000, 800)
+    boxes = [
+        Box(x0=300, y0=200, x1=700, y1=600, confidence=0.85),  # area 160000
+        Box(x0=750, y0=50, x1=1000, y1=250, confidence=0.7),  # area 50000 (31% of main)
+    ]
+
+    result = evaluate(boxes, image_size, _CONFIG)
+
+    assert result.status == "flagged"
+    assert result.reason == "multiple_fish"
+
+
 def test_genuinely_separate_boxes_stay_flagged_multiple_fish():
     # Adjacent but mostly non-overlapping boxes (IoU ~0.14) - two real,
     # distinct fish should not be merged by deduplication.
