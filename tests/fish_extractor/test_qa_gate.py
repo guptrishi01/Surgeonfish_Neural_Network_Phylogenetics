@@ -100,3 +100,33 @@ def test_center_offset_fraction_is_reported_for_accepted_box():
     result = evaluate([_centered_box(image_size)], image_size, _CONFIG)
 
     assert result.center_offset_fraction == 0.0
+
+
+def test_near_duplicate_boxes_around_one_fish_are_deduplicated_and_accepted():
+    # Two heavily-overlapping boxes (IoU ~0.84) around the same centered
+    # object - a real Grounding DINO failure mode, not two fish.
+    image_size = (1000, 800)
+    boxes = [
+        Box(x0=390, y0=290, x1=610, y1=510, confidence=0.9),
+        Box(x0=400, y0=300, x1=620, y1=520, confidence=0.85),
+    ]
+
+    result = evaluate(boxes, image_size, _CONFIG)
+
+    assert result.status == "accepted"
+    assert result.box.confidence == 0.9  # the higher-confidence box of the pair was kept
+
+
+def test_genuinely_separate_boxes_stay_flagged_multiple_fish():
+    # Adjacent but mostly non-overlapping boxes (IoU ~0.14) - two real,
+    # distinct fish should not be merged by deduplication.
+    image_size = (1000, 800)
+    boxes = [
+        Box(x0=400, y0=300, x1=600, y1=500, confidence=0.9),
+        Box(x0=550, y0=300, x1=750, y1=500, confidence=0.8),
+    ]
+
+    result = evaluate(boxes, image_size, _CONFIG)
+
+    assert result.status == "flagged"
+    assert result.reason == "multiple_fish"

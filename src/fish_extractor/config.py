@@ -62,12 +62,23 @@ class QAGateConfig:
         max_box_area_fraction: Maximum box area as a fraction of the full
             image area (rules out a box that just covers the whole frame,
             which is rarely a clean single-fish detection).
+        duplicate_iou_threshold: Two qualifying boxes with IoU (intersection
+            over union) at or above this are treated as one detection - the
+            higher-confidence box is kept - rather than as two fish. Guards
+            against a real Grounding DINO failure mode: near-duplicate boxes
+            around the same object, which would otherwise be
+            indistinguishable from a genuine multi-fish photo and flag every
+            such image as "multiple_fish". 0.5 is a standard NMS-style
+            overlap threshold (used by, e.g., torchvision's default IoU cut
+            for duplicate suppression) - high enough that two boxes around
+            genuinely different, non-overlapping fish won't be merged.
     """
 
     min_confidence: float = 0.35
     max_center_offset_fraction: float = 0.35
     min_box_area_fraction: float = 0.05
     max_box_area_fraction: float = 0.95
+    duplicate_iou_threshold: float = 0.5
 
 
 @dataclass

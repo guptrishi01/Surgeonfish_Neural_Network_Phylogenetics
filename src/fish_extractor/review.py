@@ -214,3 +214,41 @@ def apply_review_feedback(config: PipelineConfig, feedback_path: Path) -> int:
     state.save()
     logger.info("Marked %d image(s) as permanently excluded", count)
     return count
+
+
+def reset_flagged_for_reprocessing(
+    config: PipelineConfig, image_keys: set[str] | None = None
+) -> int:
+    """Resets flagged images back to "pending" so the next run() re-detects them.
+
+    For use after changing detection/QA-gate settings (e.g. tightening or
+    loosening a threshold, or - as this was added for - a new
+    duplicate-box deduplication step) when a flagged reason might no
+    longer apply. This is exactly the "revisit later" this module's own
+    docstring and the review page's instructions describe; before this,
+    there was no code path to act on that, only re-running the whole
+    pipeline from a wiped state file.
+
+    Args:
+        config: Pipeline configuration.
+        image_keys: If given, restricts to these specific image keys.
+            Default: every currently-flagged image.
+
+    Returns:
+        How many images were reset to pending.
+    """
+    state = ExtractionState(config.state_path)
+    count = 0
+    for image_key, entry in state.items():
+        if entry.status != "flagged":
+            continue
+        if image_keys is not None and image_key not in image_keys:
+            continue
+        entry.status = "pending"
+        entry.reason = ""
+        entry.box = None
+        entry.center_offset_fraction = None
+        count += 1
+    state.save()
+    logger.info("Reset %d flagged image(s) to pending for reprocessing", count)
+    return count

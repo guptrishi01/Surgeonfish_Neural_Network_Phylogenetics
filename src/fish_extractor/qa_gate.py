@@ -76,6 +76,30 @@ class QAResult:
     center_offset_fraction: float | None
 
 
+def _iou(a: Box, b: Box) -> float:
+    """Intersection-over-union of two boxes, 0.0 if they don't overlap."""
+    x0, y0 = max(a.x0, b.x0), max(a.y0, b.y0)
+    x1, y1 = min(a.x1, b.x1), min(a.y1, b.y1)
+    intersection = max(x1 - x0, 0.0) * max(y1 - y0, 0.0)
+    union = a.area + b.area - intersection
+    return intersection / union if union > 0 else 0.0
+
+
+def _deduplicate(boxes: list[Box], iou_threshold: float) -> list[Box]:
+    """Collapses near-duplicate boxes (same object, detected twice) to one.
+
+    Greedy NMS: keeps the highest-confidence box in each cluster of boxes
+    that mutually overlap at or above ``iou_threshold``, discarding the
+    rest. Two genuinely separate fish - even close together - keep their
+    own boxes as long as their overlap stays below the threshold.
+    """
+    kept: list[Box] = []
+    for box in sorted(boxes, key=lambda b: b.confidence, reverse=True):
+        if not any(_iou(box, k) >= iou_threshold for k in kept):
+            kept.append(box)
+    return kept
+
+
 def evaluate(
     boxes: list[Box],
     image_size: tuple[int, int],
@@ -95,6 +119,7 @@ def evaluate(
         other case is "flagged", never silently rejected.
     """
     qualifying = [b for b in boxes if b.confidence >= config.min_confidence]
+    qualifying = _deduplicate(qualifying, config.duplicate_iou_threshold)
 
     if len(qualifying) == 0:
         return QAResult(

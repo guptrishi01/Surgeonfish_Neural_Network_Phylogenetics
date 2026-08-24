@@ -119,7 +119,12 @@ def test_multiple_boxes_is_flagged_multiple_fish(tmp_path: Path):
     _make_species_image(
         config.raw_images_root, "Zebrasoma", "Zebrasoma_flavescens", "002_gbif_2.jpg"
     )
-    boxes = [_centered_box(confidence=0.9), _centered_box(confidence=0.8)]
+    # Genuinely separate (non-overlapping) boxes - two identically-positioned
+    # boxes would now be deduplicated as one detection, see qa_gate.py.
+    boxes = [
+        Box(x0=0, y0=0, x1=100, y1=100, confidence=0.9),
+        Box(x0=300, y0=200, x1=400, y1=300, confidence=0.8),
+    ]
     pipeline = FishExtractorPipeline(
         config, detector=_StubDetector(boxes), segmenter=_StubSegmenter()
     )
