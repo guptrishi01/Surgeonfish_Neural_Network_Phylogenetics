@@ -116,6 +116,29 @@ def _drop_dominated_boxes(boxes: list[Box], min_area_ratio: float) -> list[Box]:
     return [b for b in boxes if b.area / max_area >= min_area_ratio]
 
 
+def filter_qualifying_boxes(boxes: list[Box], config: QAGateConfig) -> list[Box]:
+    """Applies confidence, deduplication, and clutter filtering to a raw box list.
+
+    This is evaluate()'s first stage, exposed separately so a caller that
+    needs the same filtered candidate set without evaluate()'s "must be
+    exactly one" requirement - e.g. a human-reviewed override that
+    deliberately extracts using the best remaining box despite a
+    multiple_fish flag - doesn't have to duplicate the filtering logic.
+
+    Args:
+        boxes: All boxes the detector returned for this image.
+        config: Auto-accept thresholds (confidence, dedup, clutter).
+
+    Returns:
+        Boxes remaining after confidence filtering, IoU-based
+        deduplication, and clutter (size-dominance) filtering, in no
+        particular order.
+    """
+    qualifying = [b for b in boxes if b.confidence >= config.min_confidence]
+    qualifying = _deduplicate(qualifying, config.duplicate_iou_threshold)
+    return _drop_dominated_boxes(qualifying, config.min_secondary_box_area_ratio)
+
+
 def evaluate(
     boxes: list[Box],
     image_size: tuple[int, int],
@@ -134,9 +157,7 @@ def evaluate(
         the confidence threshold and its size/position both pass; every
         other case is "flagged", never silently rejected.
     """
-    qualifying = [b for b in boxes if b.confidence >= config.min_confidence]
-    qualifying = _deduplicate(qualifying, config.duplicate_iou_threshold)
-    qualifying = _drop_dominated_boxes(qualifying, config.min_secondary_box_area_ratio)
+    qualifying = filter_qualifying_boxes(boxes, config)
 
     if len(qualifying) == 0:
         return QAResult(

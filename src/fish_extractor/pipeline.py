@@ -19,7 +19,7 @@ from PIL import Image, ImageOps
 from dataset_builder.archive import unzip_all
 from fish_extractor.config import ExtractionConfig, PipelineConfig
 from fish_extractor.detector import GroundingDinoDetector
-from fish_extractor.qa_gate import Box, evaluate
+from fish_extractor.qa_gate import Box, evaluate, filter_qualifying_boxes
 from fish_extractor.segmenter import Sam2Segmenter
 from fish_extractor.state import ExtractionState
 
@@ -197,6 +197,73 @@ class FishExtractorPipeline:
             logger.warning(
                 "%d flagged image(s) have no stored box (no_detection/multiple_fish) and "
                 "were not force-accepted: %s", len(skipped_no_box), skipped_no_box
+            )
+        return results
+
+    def force_accept_with_top_box(self, image_keys: set[str]) -> list[ExtractionResult]:
+        """Extracts specific flagged images using a freshly-detected best box.
+
+        For flagged images with no usable stored box (``no_detection``,
+        ``multiple_fish``) that a human has looked at and confirmed are
+        fine anyway - unlike ``force_accept_flagged``, no box survived to
+        reuse, so this re-runs detection and extracts using the single
+        highest-confidence box remaining after the same
+        confidence/deduplication/clutter filtering ``evaluate()`` applies,
+        without requiring it to be the *only* one. This is a deliberate,
+        per-image human override, not a QA-gate change, so it takes no
+        default "every flagged image" - always pass the exact keys a human
+        actually reviewed.
+
+        Args:
+            image_keys: The specific image keys to process. Required.
+
+        Returns:
+            One ExtractionResult per image actually extracted. Images with
+            no qualifying boxes at all after filtering are skipped and
+            reported, not silently dropped.
+        """
+        unzip_all(self._config.raw_images_root)
+        results = []
+        skipped_no_box = []
+        for image_key in sorted(image_keys):
+            entry = self._state.get(image_key)
+            image_path = self._config.raw_images_root / image_key
+            raw_image = Image.open(image_path)
+            raw_image.load()
+            image = _flatten_to_rgb(raw_image)
+
+            boxes = self._detector.detect(image)
+            qualifying = filter_qualifying_boxes(boxes, self._config.qa_gate)
+            if not qualifying:
+                skipped_no_box.append(image_key)
+                continue
+            box = max(qualifying, key=lambda b: b.confidence)
+
+            mask = self._segmenter.segment(image, box)
+            extracted, cropped_mask = _mask_cutout_and_crop(image, mask, self._config.extraction)
+
+            extracted_dir = self._config.extracted_root / Path(image_key).parent
+            extracted_dir.mkdir(parents=True, exist_ok=True)
+            stem = Path(image_key).stem
+            extracted_path = extracted_dir / f"{stem}.png"
+            mask_path = extracted_dir / f"{stem}_mask.png"
+            extracted.save(extracted_path)
+            Image.fromarray((cropped_mask * 255).astype("uint8")).save(mask_path)
+
+            entry.status = "accepted"
+            entry.reason = "human_confirmed_multi_box"
+            entry.box = [box.x0, box.y0, box.x1, box.y1, box.confidence]
+            entry.extracted_path = str(extracted_path)
+            entry.mask_path = str(mask_path)
+            self._write_metadata_row(image_key, entry)
+            self._state.save()
+            results.append(ExtractionResult(image_key, "accepted", "human_confirmed_multi_box"))
+            logger.info("%s: force-accepted with top box (human_confirmed_multi_box)", image_key)
+
+        if skipped_no_box:
+            logger.warning(
+                "%d image(s) had no qualifying box even after filtering, skipped: %s",
+                len(skipped_no_box), skipped_no_box
             )
         return results
 

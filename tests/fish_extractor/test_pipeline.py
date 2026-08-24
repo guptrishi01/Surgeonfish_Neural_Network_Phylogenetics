@@ -277,6 +277,56 @@ def test_force_accept_flagged_respects_image_keys_filter(tmp_path: Path):
     assert state.get("Zebrasoma/Zebrasoma_flavescens/001_gbif_1.jpg").status == "flagged"
 
 
+def test_force_accept_with_top_box_extracts_using_the_highest_confidence_box(tmp_path: Path):
+    config = _config(tmp_path)
+    _make_species_image(
+        config.raw_images_root, "Acanthurus", "Acanthurus_guttatus", "001_gbif_1.jpg"
+    )
+    # Two genuinely separate boxes - flags as multiple_fish, no box stored.
+    boxes = [
+        Box(x0=10, y0=10, x1=110, y1=110, confidence=0.6),
+        Box(x0=200, y0=150, x1=340, y1=260, confidence=0.9),  # higher confidence
+    ]
+    detector = _StubDetector(boxes)
+    segmenter = _StubSegmenter()
+    pipeline = FishExtractorPipeline(config, detector=detector, segmenter=segmenter)
+    flagged = pipeline.run()
+    assert flagged[0].reason == "multiple_fish"
+    assert segmenter.call_count == 0
+
+    results = pipeline.force_accept_with_top_box(
+        image_keys={"Acanthurus/Acanthurus_guttatus/001_gbif_1.jpg"}
+    )
+
+    assert len(results) == 1
+    assert results[0].status == "accepted"
+    assert results[0].reason == "human_confirmed_multi_box"
+    assert segmenter.call_count == 1
+    state = ExtractionState(config.state_path)
+    entry = state.get("Acanthurus/Acanthurus_guttatus/001_gbif_1.jpg")
+    assert entry.status == "accepted"
+    assert entry.box[4] == 0.9  # the higher-confidence box was used
+    extracted_dir = config.extracted_root / "Acanthurus" / "Acanthurus_guttatus"
+    assert (extracted_dir / "001_gbif_1.png").exists()
+
+
+def test_force_accept_with_top_box_skips_and_reports_when_nothing_qualifies(tmp_path: Path):
+    config = _config(tmp_path)
+    _make_species_image(config.raw_images_root, "Naso", "Naso_annulatus", "001_gbif_1.jpg")
+    pipeline = FishExtractorPipeline(
+        config, detector=_StubDetector([]), segmenter=_StubSegmenter()  # no_detection
+    )
+    pipeline.run()
+
+    results = pipeline.force_accept_with_top_box(
+        image_keys={"Naso/Naso_annulatus/001_gbif_1.jpg"}
+    )
+
+    assert results == []
+    state = ExtractionState(config.state_path)
+    assert state.get("Naso/Naso_annulatus/001_gbif_1.jpg").status == "flagged"
+
+
 def test_saved_mask_is_cropped_to_match_the_extracted_image(tmp_path: Path):
     config = _config(tmp_path)
     _make_species_image(
