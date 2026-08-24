@@ -31,9 +31,7 @@ def test_spotted_image_is_detected_as_spot_present():
     image, mask = _spotted_image()
     cluster_result = _cluster_result_for(image, mask, k=2)
 
-    features = extract_spot_features(
-        cluster_result, RegionConfig(min_region_area_px=5), SpotConfig()
-    )
+    features = extract_spot_features(cluster_result, RegionConfig(), SpotConfig())
 
     assert features.spot_count >= 3
     assert features.spot_present is True

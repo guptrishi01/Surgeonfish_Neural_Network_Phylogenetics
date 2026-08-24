@@ -57,11 +57,28 @@ class RegionConfig:
     """Shared thresholds for connected-component region analysis.
 
     Attributes:
-        min_region_area_px: Regions smaller than this are treated as noise
-            and ignored by both the spot and stripe extractors.
+        min_region_area_fraction: Regions smaller than this fraction of the
+            image's total masked-in (fish) pixel count are treated as noise
+            and ignored by both the spot and stripe extractors. Was
+            previously a fixed 20-pixel absolute count, calibrated against
+            tiny synthetic test images (under ~1,200 pixels) and never
+            exercised at real crop sizes - fish_extractor doesn't resize
+            crops, so masked area ranges from tens of thousands to millions
+            of pixels, and a fixed pixel floor doesn't scale with that.
+            Measured against real Phase 1/2 output: with the old 20px
+            floor, 99% of all 856 real images were flagged
+            `stripe_present` regardless of the species' actual pattern
+            (including species with no real stripes at all) - hundreds of
+            small, incidentally-elongated noise/texture regions (lighting
+            variation, blended pixels at the mask boundary, JPEG artifacts)
+            were clearing that floor easily. 0.001 (0.1% of the fish's
+            visible area) is a reasoned interim default, not yet validated
+            against manually-labeled ground truth - the planned but
+            not-yet-built 60/20/20 validation split (see Planned Approach
+            step 2) is the right way to calibrate this properly.
     """
 
-    min_region_area_px: int = 20
+    min_region_area_fraction: float = 0.001
 
 
 @dataclass

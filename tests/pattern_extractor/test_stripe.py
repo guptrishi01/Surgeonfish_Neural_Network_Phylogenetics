@@ -57,7 +57,7 @@ def test_striped_image_is_detected_as_stripe_present():
     cluster_result = _cluster_result_for(image, mask, k=2)
 
     features = extract_stripe_features(
-        image, mask, cluster_result, RegionConfig(min_region_area_px=5), StripeConfig()
+        image, mask, cluster_result, RegionConfig(), StripeConfig()
     )
 
     assert features.stripe_present is True

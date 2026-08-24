@@ -110,7 +110,7 @@ def extract_stripe_features(
     Returns:
         StripeFeatures for this image.
     """
-    regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_px)
+    regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_fraction)
     elongated_count = sum(
         1 for region in regions if region.eccentricity >= stripe_config.min_eccentricity_for_stripe
     )

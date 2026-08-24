@@ -94,7 +94,9 @@ def find_regions(binary_mask: np.ndarray, min_area: int = 1) -> list[RegionStats
     return regions
 
 
-def non_dominant_cluster_regions(cluster_result: ClusterResult, min_area: int) -> list[RegionStats]:
+def non_dominant_cluster_regions(
+    cluster_result: ClusterResult, min_area_fraction: float
+) -> list[RegionStats]:
     """Regions found across every cluster except the largest.
 
     Shared by spot.py and stripe.py: the dominant (largest-fraction)
@@ -105,8 +107,13 @@ def non_dominant_cluster_regions(cluster_result: ClusterResult, min_area: int) -
 
     Args:
         cluster_result: Output of clustering.assign_clusters().
-        min_area: Passed through to find_regions() as the noise-filtering
-            floor.
+        min_area_fraction: Regions smaller than this fraction of the
+            image's *total* masked-in (fish) pixel count - not just the
+            fraction of whichever single cluster a region belongs to - are
+            dropped as noise. Resolved to an absolute pixel count here
+            before being passed to find_regions(), so the noise floor
+            scales with the actual crop size rather than staying fixed
+            regardless of it.
 
     Returns:
         All RegionStats across every non-dominant cluster's binary mask,
@@ -116,6 +123,8 @@ def non_dominant_cluster_regions(cluster_result: ClusterResult, min_area: int) -
     """
     if cluster_result.fractions.size == 0:
         return []
+    total_masked_pixels = len(cluster_result.mask_coords[0])
+    min_area = max(1, round(total_masked_pixels * min_area_fraction))
     dominant_cluster = int(cluster_result.fractions.argmax())
     regions = []
     for cluster_index in range(len(cluster_result.fractions)):

@@ -53,7 +53,7 @@ def extract_spot_features(
     Returns:
         SpotFeatures for this image.
     """
-    regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_px)
+    regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_fraction)
     spot_areas = [
         region.area for region in regions
         if region.eccentricity <= spot_config.max_eccentricity_for_spot

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from pattern_extractor.geometry import find_regions
+from pattern_extractor.clustering import ClusterResult
+from pattern_extractor.geometry import find_regions, non_dominant_cluster_regions
 
 
 def test_single_round_blob_has_low_eccentricity():
@@ -57,6 +58,56 @@ def test_region_area_matches_pixel_count():
     regions = find_regions(mask, min_area=1)
 
     assert regions[0].area == 50
+
+
+def test_noise_floor_scales_with_total_masked_area_not_a_fixed_pixel_count():
+    # A 50-pixel region would have cleared the old fixed 20px absolute
+    # floor regardless of image size. At a real-scale total masked area
+    # (100,000 pixels here), 0.1% of that is 100px - the 50-pixel region
+    # should now be filtered as noise, which a fixed pixel count could
+    # never do regardless of how the image scaled up.
+    total_pixels = 100_000
+    noise_size = 50
+    dominant_size = total_pixels - noise_size
+
+    # A single row: columns [0, dominant_size) are the dominant cluster,
+    # the last `noise_size` columns form one contiguous non-dominant blob.
+    labels = np.array([0] * dominant_size + [1] * noise_size)
+    mask_coords = (np.zeros(total_pixels, dtype=int), np.arange(total_pixels))
+    fractions = np.array([dominant_size / total_pixels, noise_size / total_pixels])
+    cluster_result = ClusterResult(
+        centers=np.zeros((2, 3)),
+        labels=labels,
+        fractions=fractions,
+        mask_shape=(1, total_pixels),
+        mask_coords=mask_coords,
+    )
+
+    regions = non_dominant_cluster_regions(cluster_result, min_area_fraction=0.001)
+
+    assert regions == []  # the 50px noise blob was below the scaled floor (100px)
+
+
+def test_noise_floor_keeps_regions_above_the_scaled_threshold():
+    total_pixels = 100_000
+    real_region_size = 500  # well above the 100px floor at 0.1% of 100,000
+    dominant_size = total_pixels - real_region_size
+
+    labels = np.array([0] * dominant_size + [1] * real_region_size)
+    mask_coords = (np.zeros(total_pixels, dtype=int), np.arange(total_pixels))
+    fractions = np.array([dominant_size / total_pixels, real_region_size / total_pixels])
+    cluster_result = ClusterResult(
+        centers=np.zeros((2, 3)),
+        labels=labels,
+        fractions=fractions,
+        mask_shape=(1, total_pixels),
+        mask_coords=mask_coords,
+    )
+
+    regions = non_dominant_cluster_regions(cluster_result, min_area_fraction=0.001)
+
+    assert len(regions) == 1
+    assert regions[0].area == real_region_size
 
 
 def test_many_scattered_specks_dont_corrupt_a_real_blobs_centroid():
