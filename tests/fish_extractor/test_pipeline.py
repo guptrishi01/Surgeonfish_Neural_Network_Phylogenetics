@@ -16,6 +16,7 @@ from PIL import Image
 from fish_extractor.config import PipelineConfig
 from fish_extractor.pipeline import FishExtractorPipeline
 from fish_extractor.qa_gate import Box
+from fish_extractor.state import ExtractionState
 
 
 class _StubDetector:
@@ -200,6 +201,75 @@ def test_extraction_replaces_background_and_crops_to_mask(tmp_path: Path):
     # Cropped to the box (200x150) plus 2*margin, not the full 400x300 source.
     assert extracted.size[0] < 400
     assert extracted.size[1] < 300
+
+
+def _off_center_box(size=(400, 300), confidence=0.9) -> Box:
+    """A single, real box that fails only the off_center threshold (area is fine)."""
+    return Box(x0=0, y0=0, x1=100, y1=75, confidence=confidence)
+
+
+def test_force_accept_flagged_extracts_using_the_stored_box(tmp_path: Path):
+    config = _config(tmp_path)
+    _make_species_image(
+        config.raw_images_root, "Acanthurus", "Acanthurus_guttatus", "001_gbif_1.jpg"
+    )
+    segmenter = _StubSegmenter()
+    pipeline = FishExtractorPipeline(
+        config, detector=_StubDetector([_off_center_box()]), segmenter=segmenter
+    )
+    flagged = pipeline.run()
+    assert flagged[0].status == "flagged"
+    assert flagged[0].reason == "off_center"
+    assert segmenter.call_count == 0  # never segmented while flagged
+
+    results = pipeline.force_accept_flagged()
+
+    assert len(results) == 1
+    assert results[0].status == "accepted"
+    assert results[0].reason == "human_confirmed"
+    assert segmenter.call_count == 1
+    extracted_dir = config.extracted_root / "Acanthurus" / "Acanthurus_guttatus"
+    assert (extracted_dir / "001_gbif_1.png").exists()
+    assert (extracted_dir / "001_gbif_1_mask.png").exists()
+
+
+def test_force_accept_flagged_skips_entries_with_no_stored_box(tmp_path: Path):
+    config = _config(tmp_path)
+    _make_species_image(config.raw_images_root, "Naso", "Naso_annulatus", "001_gbif_1.jpg")
+    pipeline = FishExtractorPipeline(
+        config, detector=_StubDetector([]), segmenter=_StubSegmenter()  # no_detection, box=None
+    )
+    flagged = pipeline.run()
+    assert flagged[0].reason == "no_detection"
+
+    results = pipeline.force_accept_flagged()
+
+    assert results == []
+    state = ExtractionState(config.state_path)
+    assert state.get("Naso/Naso_annulatus/001_gbif_1.jpg").status == "flagged"
+
+
+def test_force_accept_flagged_respects_image_keys_filter(tmp_path: Path):
+    config = _config(tmp_path)
+    _make_species_image(
+        config.raw_images_root, "Acanthurus", "Acanthurus_guttatus", "001_gbif_1.jpg"
+    )
+    _make_species_image(
+        config.raw_images_root, "Zebrasoma", "Zebrasoma_flavescens", "001_gbif_1.jpg"
+    )
+    pipeline = FishExtractorPipeline(
+        config, detector=_StubDetector([_off_center_box()]), segmenter=_StubSegmenter()
+    )
+    pipeline.run()
+
+    results = pipeline.force_accept_flagged(
+        image_keys={"Acanthurus/Acanthurus_guttatus/001_gbif_1.jpg"}
+    )
+
+    assert len(results) == 1
+    assert results[0].image_key == "Acanthurus/Acanthurus_guttatus/001_gbif_1.jpg"
+    state = ExtractionState(config.state_path)
+    assert state.get("Zebrasoma/Zebrasoma_flavescens/001_gbif_1.jpg").status == "flagged"
 
 
 def test_saved_mask_is_cropped_to_match_the_extracted_image(tmp_path: Path):

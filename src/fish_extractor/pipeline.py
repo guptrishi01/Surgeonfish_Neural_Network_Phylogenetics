@@ -19,7 +19,7 @@ from PIL import Image, ImageOps
 from dataset_builder.archive import unzip_all
 from fish_extractor.config import ExtractionConfig, PipelineConfig
 from fish_extractor.detector import GroundingDinoDetector
-from fish_extractor.qa_gate import evaluate
+from fish_extractor.qa_gate import Box, evaluate
 from fish_extractor.segmenter import Sam2Segmenter
 from fish_extractor.state import ExtractionState
 
@@ -127,6 +127,77 @@ class FishExtractorPipeline:
             result = self._process_one(image_path, image_key)
             results.append(result)
             self._state.save()
+        return results
+
+    def force_accept_flagged(self, image_keys: set[str] | None = None) -> list[ExtractionResult]:
+        """Extracts flagged images a human reviewer has confirmed are actually usable.
+
+        The review page only offers "exclude permanently" - leaving an image
+        unchecked means "still flagged," not "accept it," so a reviewer who
+        decides a flagged image is actually fine has no way to act on that
+        decision through the normal review loop. This bypasses the QA gate
+        for exactly that case, using the box already stored from the
+        original detection (the one that failed a QA-gate threshold, not a
+        fresh detection).
+
+        Only usable for flagged images that have a stored box - QA-gate
+        reasons ``off_center``, ``box_too_small``, and ``box_too_large`` all
+        keep the box; ``no_detection`` and ``multiple_fish`` do not, since
+        there is no single box to segment from in either case. Those are
+        skipped and reported, not silently dropped - they need a fresh
+        detection or a manually-specified box, not a bypass.
+
+        Args:
+            image_keys: If given, restricts to these specific image keys.
+                Default: every currently-flagged image with a stored box.
+
+        Returns:
+            One ExtractionResult per image actually force-accepted.
+        """
+        unzip_all(self._config.raw_images_root)
+        results = []
+        skipped_no_box = []
+        for image_key, entry in self._state.items():
+            if entry.status != "flagged":
+                continue
+            if image_keys is not None and image_key not in image_keys:
+                continue
+            if entry.box is None:
+                skipped_no_box.append(image_key)
+                continue
+
+            image_path = self._config.raw_images_root / image_key
+            raw_image = Image.open(image_path)
+            raw_image.load()
+            image = _flatten_to_rgb(raw_image)
+            box = Box(x0=entry.box[0], y0=entry.box[1], x1=entry.box[2], y1=entry.box[3],
+                      confidence=entry.box[4])
+
+            mask = self._segmenter.segment(image, box)
+            extracted, cropped_mask = _mask_cutout_and_crop(image, mask, self._config.extraction)
+
+            extracted_dir = self._config.extracted_root / Path(image_key).parent
+            extracted_dir.mkdir(parents=True, exist_ok=True)
+            stem = Path(image_key).stem
+            extracted_path = extracted_dir / f"{stem}.png"
+            mask_path = extracted_dir / f"{stem}_mask.png"
+            extracted.save(extracted_path)
+            Image.fromarray((cropped_mask * 255).astype("uint8")).save(mask_path)
+
+            entry.status = "accepted"
+            entry.reason = "human_confirmed"
+            entry.extracted_path = str(extracted_path)
+            entry.mask_path = str(mask_path)
+            self._write_metadata_row(image_key, entry)
+            self._state.save()
+            results.append(ExtractionResult(image_key, "accepted", "human_confirmed"))
+            logger.info("%s: force-accepted (human_confirmed)", image_key)
+
+        if skipped_no_box:
+            logger.warning(
+                "%d flagged image(s) have no stored box (no_detection/multiple_fish) and "
+                "were not force-accepted: %s", len(skipped_no_box), skipped_no_box
+            )
         return results
 
     def _iter_source_images(self, species_filter: set[str] | None):
