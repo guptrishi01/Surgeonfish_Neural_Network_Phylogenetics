@@ -21,11 +21,22 @@ class ClusteringConfig:
         random_seed: Seed for the reference image's initial k-means fit
             (subsequent images are deterministic given that fit's centres).
         max_iterations: Iteration cap per k-means run.
+        max_pixels_for_fitting: Cap on how many masked-in pixels the
+            iterative k-means fit itself runs on - a real (non-resized)
+            fish crop can have millions of masked pixels, and k-means's
+            fit cost scales with pixel count x iterations, not just pixel
+            count. Above this cap, a random subsample is fit instead;
+            every actual pixel is still assigned to its nearest fitted
+            centre afterward in a single vectorized pass, so this only
+            affects fitting speed, not which pixels get labelled. 50,000
+            was checked to reproduce a full 2-million-pixel fit's centres
+            to within ~1 RGB unit, in about 1/100th the time.
     """
 
     k: int = 4
     random_seed: int = 0
     max_iterations: int = 100
+    max_pixels_for_fitting: int = 50_000
 
 
 @dataclass

@@ -65,6 +65,22 @@ def test_binary_mask_for_cluster_matches_mask_shape_and_is_disjoint():
     assert np.all((mask0 | mask1) == mask)  # every masked-in pixel is assigned
 
 
+def test_fitting_is_subsampled_but_every_pixel_still_gets_labeled():
+    # 100x100 = 10,000 masked pixels, well above a deliberately tiny fitting
+    # cap - forces the subsampling path without needing a huge test image.
+    image, mask = _two_color_image(size=(100, 100), split_fraction=0.5)
+    config = ClusteringConfig(k=2, random_seed=0, max_pixels_for_fitting=500)
+
+    reference_centers = fit_reference(image, mask, config)
+    result = assign_clusters(image, mask, reference_centers, config)
+
+    # Fitting used only a sample, but labelling must still cover every
+    # actual masked-in pixel, not just the ones used to fit the centres.
+    assert len(result.labels) == mask.sum() == 10_000
+    assert abs(result.fractions.sum() - 1.0) < 1e-9
+    assert max(result.fractions) < 0.75  # still cleanly splits red/blue halves
+
+
 def test_solid_color_image_concentrates_into_one_dominant_cluster():
     height, width = 30, 30
     image = np.full((height, width, 3), (100, 150, 90), dtype=np.uint8)

@@ -65,12 +65,25 @@ class PatternExtractorPipeline:
         """
         rows: list[dict] = []
         root = self._config.extracted_root
-        for genus_dir in sorted(p for p in root.iterdir() if p.is_dir()):
-            for species_dir in sorted(p for p in genus_dir.iterdir() if p.is_dir()):
-                species_name = species_dir.name.replace("_", " ")
-                if species_filter and species_name not in species_filter:
-                    continue
-                rows.extend(self._process_species(species_dir))
+        species_dirs = [
+            species_dir
+            for genus_dir in sorted(p for p in root.iterdir() if p.is_dir())
+            for species_dir in sorted(p for p in genus_dir.iterdir() if p.is_dir())
+            if not species_filter or species_dir.name.replace("_", " ") in species_filter
+        ]
+        # Per-species, not per-image: this stage has no resumable state (see
+        # module docstring), so a run can only be checked on while it's
+        # happening, not resumed - clustering's iterative fit is the
+        # expensive part per image, and with no progress output at all a
+        # slow run (large, non-resized crops) is indistinguishable from a
+        # hung one.
+        for i, species_dir in enumerate(species_dirs, start=1):
+            species_rows = self._process_species(species_dir)
+            rows.extend(species_rows)
+            logger.info(
+                "[%d/%d] %s: %d image(s) processed",
+                i, len(species_dirs), species_dir.name, len(species_rows),
+            )
         self._write_csv(rows)
         return rows
 

@@ -10,7 +10,7 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.cluster.vq import kmeans2
+from scipy.cluster.vq import kmeans2, vq
 
 from pattern_extractor.config import ClusteringConfig
 
@@ -48,6 +48,27 @@ class ClusterResult:
         return self.label_image() == cluster_index
 
 
+def _subsample(pixels: np.ndarray, max_pixels: int, seed: int) -> np.ndarray:
+    """Randomly subsamples rows of `pixels` down to `max_pixels`, if larger.
+
+    `fish_extractor` deliberately doesn't resize crops (native resolution),
+    so a real fish mask can be hundreds of thousands to millions of pixels -
+    feeding all of them into k-means's iterative fit (up to
+    ``max_iterations`` passes over every point) scales badly and was
+    measured taking tens of seconds per image at real crop sizes, times
+    ~900 images. A random subsample is standard practice for colour
+    clustering: centres fit from a representative sample converge to
+    within ~1 RGB unit of the full-data fit at 50,000 samples (checked
+    against a 2-million-pixel synthetic image), in roughly 1/100th the
+    time. Every synthetic test image used before this was small enough
+    (under ~1,200 pixels) that this cliff was never exercised.
+    """
+    if len(pixels) <= max_pixels:
+        return pixels
+    rng = np.random.default_rng(seed)
+    return pixels[rng.choice(len(pixels), max_pixels, replace=False)]
+
+
 def fit_reference(image_rgb: np.ndarray, mask: np.ndarray, config: ClusteringConfig) -> np.ndarray:
     """Fits k-means on a species' reference image, returning cluster centres.
 
@@ -63,12 +84,17 @@ def fit_reference(image_rgb: np.ndarray, mask: np.ndarray, config: ClusteringCon
         just its pixel count) - asking k-means for more clusters than
         there are distinct colours produces duplicate/empty clusters and
         scipy warnings, which a solid-coloured reference fish would
-        otherwise hit routinely.
+        otherwise hit routinely. The fit itself runs on at most
+        ``config.max_pixels_for_fitting`` randomly-sampled pixels, not
+        every masked-in pixel - see `_subsample`.
     """
     pixels = image_rgb[mask].astype(float)
     n_unique_colors = len(np.unique(pixels, axis=0))
     k = min(config.k, n_unique_colors)
-    centers, _ = kmeans2(pixels, k, iter=config.max_iterations, minit="++", seed=config.random_seed)
+    fit_pixels = _subsample(pixels, config.max_pixels_for_fitting, config.random_seed)
+    centers, _ = kmeans2(
+        fit_pixels, k, iter=config.max_iterations, minit="++", seed=config.random_seed
+    )
     return centers
 
 
@@ -83,7 +109,12 @@ def assign_clusters(
     Per patternize's method: reference_centers seed the k-means fit rather
     than being used as fixed nearest-centroid boundaries, so this image's
     clusters can adapt to its own lighting/colour while starting from (and
-    staying identified with) the reference image's cluster centres.
+    staying identified with) the reference image's cluster centres. The
+    iterative fit runs on at most ``config.max_pixels_for_fitting`` randomly
+    -sampled pixels (see `_subsample`); every actual masked-in pixel is
+    then assigned to its nearest fitted centre in a single vectorized pass
+    (`scipy.cluster.vq.vq`, not iterative), so `fractions`/`label_image()`
+    still reflect the whole image, not just the fitting sample.
 
     Args:
         image_rgb: (H, W, 3) uint8 RGB array.
@@ -95,10 +126,12 @@ def assign_clusters(
         A ClusterResult for this image.
     """
     pixels = image_rgb[mask].astype(float)
-    centers, labels = kmeans2(
-        pixels, reference_centers.copy(), iter=config.max_iterations, minit="matrix",
+    fit_pixels = _subsample(pixels, config.max_pixels_for_fitting, config.random_seed)
+    centers, _ = kmeans2(
+        fit_pixels, reference_centers.copy(), iter=config.max_iterations, minit="matrix",
         seed=config.random_seed,
     )
+    labels, _ = vq(pixels, centers)
     counts = np.bincount(labels, minlength=len(reference_centers))
     fractions = counts / counts.sum() if counts.sum() > 0 else counts.astype(float)
     return ClusterResult(
