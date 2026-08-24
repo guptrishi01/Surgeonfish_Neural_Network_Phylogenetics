@@ -50,12 +50,28 @@ def find_regions(binary_mask: np.ndarray, min_area: int = 1) -> list[RegionStats
         One RegionStats per surviving connected component.
     """
     labeled, n = ndimage.label(binary_mask)
+    if n == 0:
+        return []
+    # find_objects() locates each label's bounding box in a single pass
+    # over the whole array; without it, a per-label `np.where(labeled ==
+    # label_id)` re-scans the *entire* image for every component. A clean
+    # synthetic test image has 1-2 components and never exposed this, but a
+    # real photo's non-dominant colour cluster can have hundreds to
+    # thousands of tiny noise/texture components (JPEG artifacts, water
+    # texture, background flecks) against a multi-megapixel crop -
+    # measured at ~50s for one such image with the naive approach, ~0.1s
+    # with this one.
+    bounding_boxes = ndimage.find_objects(labeled)
     regions = []
-    for label_id in range(1, n + 1):
-        rows, cols = np.where(labeled == label_id)
-        area = len(rows)
+    for label_id, bbox in enumerate(bounding_boxes, start=1):
+        if bbox is None:
+            continue
+        local_rows, local_cols = np.where(labeled[bbox] == label_id)
+        area = len(local_rows)
         if area < min_area:
             continue
+        rows = local_rows + bbox[0].start
+        cols = local_cols + bbox[1].start
         row_mean, col_mean = rows.mean(), cols.mean()
         dr, dc = rows - row_mean, cols - col_mean
         mu20 = float(np.mean(dr * dr))

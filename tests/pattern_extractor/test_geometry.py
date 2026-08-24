@@ -57,3 +57,22 @@ def test_region_area_matches_pixel_count():
     regions = find_regions(mask, min_area=1)
 
     assert regions[0].area == 50
+
+
+def test_many_scattered_specks_dont_corrupt_a_real_blobs_centroid():
+    # Exercises the bounding-box-offset path (find_objects()) with many
+    # small components scattered across a large array, plus one real blob
+    # positioned well away from the origin - a systematic offset bug in
+    # translating local (within-bounding-box) coordinates back to global
+    # ones would show up as a wrong centroid here.
+    mask = np.zeros((500, 500), dtype=bool)
+    rng = np.random.default_rng(0)
+    ys, xs = rng.integers(0, 500, 200), rng.integers(0, 500, 200)
+    mask[ys, xs] = True  # up to 200 single-pixel noise specks
+    mask[300:310, 200:220] = True  # a real 10x20 = 200-pixel blob, off-origin
+
+    regions = find_regions(mask, min_area=50)
+
+    assert len(regions) == 1  # every noise speck (area 1) filtered by min_area
+    assert regions[0].area == 200
+    assert regions[0].centroid == (304.5, 209.5)  # exact center of rows 300-309, cols 200-219
