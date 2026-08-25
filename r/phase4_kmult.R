@@ -41,12 +41,28 @@
 #     less conservative default - swap for p.adjust(method = "bonferroni")
 #     if a more conservative correction is preferred).
 #
-# NOT included in this script: the secondary phylogenetically-permuted
-# Mantel check. Implementing "phylogenetic permutation" correctly (per
-# Harmon & Glor 2010, the paper that motivated this project's whole
-# Kmult-over-Mantel decision) needs its own careful verification this
-# session couldn't do responsibly alongside an already-unverified R
-# environment - tracked as a deliberate next step, not silently dropped.
+# Secondary test (Steps 6-8): phylogenetically-permuted Mantel check per
+# dimension, using Phase 3's already-built pattern-distance matrices
+# (outputs/{color,stripe,spot}_distance_matrix.csv) against its patristic
+# distance matrix (outputs/patristic_distance_matrix.csv). Per Harmon &
+# Glor (2010) - the paper that motivated this project's whole
+# Kmult-over-Mantel decision - naive label-shuffling permutation inflates
+# Mantel's type-I error when both matrices carry phylogenetic
+# autocorrelation; their remedy is to build the null distribution by
+# simulating trait evolution ON THE REAL TREE (Brownian motion) rather
+# than permuting species labels. Implemented here using ape::rTraitCont()
+# (its real signature confirmed against the CRAN manual before writing
+# this - not guessed, see CLAUDE.md's "no guessing on unfamiliar
+# library/API surfaces" rule, added after this script's first draft
+# guessed a geomorph field name and crashed on real data) plus base R's
+# cor()/lower.tri()/dist() for the Mantel statistic itself, deliberately
+# avoiding another unfamiliar package's Mantel implementation (e.g.
+# vegan::mantel()) where the risk of a repeat guessing mistake is real.
+#
+# THIS SECTION (Steps 6-8) IS NEWER AND LESS-TESTED THAN STEPS 0-5, WHICH
+# HAVE ALREADY BEEN RUN SUCCESSFULLY ON REAL DATA. It has not yet been
+# executed at all - same caveat as this whole file originally carried,
+# now narrowed to just this addition.
 
 library(geomorph)
 library(ape)
@@ -161,4 +177,96 @@ cat("of no association - Harmon & Glor (2010) found real power limitations even\
 cat("with the correct phylogenetic-signal remedy applied. See README.md.\n\n")
 
 write.csv(results_table, "outputs/phase4/kmult_results.csv", row.names = FALSE)
-cat("Wrote outputs/phase4/kmult_results.csv\n")
+cat("Wrote outputs/phase4/kmult_results.csv\n\n")
+
+# ---------------------------------------------------------------------------
+# Step 6: secondary test - phylogenetically-permuted Mantel check per
+# dimension. See the header comment for the full method and why
+# ape::rTraitCont() (verified) plus base R (not another unfamiliar
+# package's Mantel implementation) was used.
+# ---------------------------------------------------------------------------
+cat("=== Step 6: secondary test - phylogenetically-permuted Mantel ===\n")
+
+mantel_r <- function(dist_a, dist_b) {
+  # Pearson correlation between corresponding lower-triangle entries of two
+  # distance matrices - the standard modern Mantel statistic definition
+  # (as used by e.g. vegan::mantel()), not Mantel's original (1967)
+  # unnormalized cross-product sum.
+  idx <- lower.tri(dist_a)
+  cor(dist_a[idx], dist_b[idx])
+}
+
+n_permutations <- 1000
+set.seed(1)  # fixed seed - the simulated null distribution below is stochastic,
+             # unlike physignal.z's own RRPP scheme (seed = NULL is already
+             # deterministic there); without a fixed seed here, re-running
+             # this section would jitter the Mantel p-values slightly each time.
+
+patristic <- as.matrix(read.csv("outputs/patristic_distance_matrix.csv", row.names = 1))
+species_order <- rownames(patristic)
+
+if (!identical(sort(species_order), sort(phy$tip.label))) {
+  stop(sprintf(
+    "Phase 3's patristic matrix species don't match Phase 4's tree tips exactly.\nIn patristic not tree: %s\nIn tree not patristic: %s",
+    paste(setdiff(species_order, phy$tip.label), collapse = ", "),
+    paste(setdiff(phy$tip.label, species_order), collapse = ", ")
+  ))
+}
+
+mantel_results <- list()
+for (dim in dimensions) {
+  pattern_dist <- as.matrix(read.csv(sprintf("outputs/%s_distance_matrix.csv", dim), row.names = 1))
+  if (!identical(sort(rownames(pattern_dist)), sort(species_order))) {
+    stop(sprintf(
+      "%s_distance_matrix.csv species don't match the patristic matrix exactly.\nIn pattern not patristic: %s\nIn patristic not pattern: %s",
+      dim,
+      paste(setdiff(rownames(pattern_dist), species_order), collapse = ", "),
+      paste(setdiff(species_order, rownames(pattern_dist)), collapse = ", ")
+    ))
+  }
+  pattern_dist <- pattern_dist[species_order, species_order]
+
+  observed_r <- mantel_r(pattern_dist, patristic)
+
+  n_features <- ncol(data_by_dimension[[dim]])  # same dimensionality Step 3 used for physignal.z
+  null_r <- numeric(n_permutations)
+  for (i in seq_len(n_permutations)) {
+    sim_traits <- sapply(seq_len(n_features), function(j) rTraitCont(phy, model = "BM"))
+    rownames(sim_traits) <- phy$tip.label  # explicit, not assumed - see header comment
+    sim_dist <- as.matrix(dist(sim_traits))
+    sim_dist <- sim_dist[species_order, species_order]
+    null_r[i] <- mantel_r(sim_dist, patristic)
+  }
+
+  p_value <- mean(abs(null_r) >= abs(observed_r))
+  mantel_results[[dim]] <- list(observed_r = observed_r, p_value = p_value)
+  cat(sprintf(
+    "%s: observed Mantel r = %.4f, phylogenetically-permuted p = %.4f (n=%d sims)\n",
+    dim, observed_r, p_value, n_permutations
+  ))
+}
+cat("\n")
+
+# ---------------------------------------------------------------------------
+# Step 7: multiple-comparisons correction across the three dimensions'
+# Mantel p-values (same BH method as Step 5, per the README's requirement
+# that this apply to both the primary and secondary tests).
+# ---------------------------------------------------------------------------
+cat("=== Step 7: Mantel multiple-comparisons correction ===\n")
+mantel_raw_p <- sapply(mantel_results, function(r) r$p_value)
+mantel_corrected_p <- p.adjust(mantel_raw_p, method = "BH")
+mantel_table <- data.frame(
+  dimension = dimensions,
+  observed_r = sapply(mantel_results, function(r) r$observed_r),
+  raw_p = mantel_raw_p,
+  bh_corrected_p = mantel_corrected_p
+)
+print(mantel_table)
+cat("\nSame caveat as the primary test: a null result here is inconclusive, not\n")
+cat("evidence of no association.\n\n")
+
+# ---------------------------------------------------------------------------
+# Step 8: write the secondary results.
+# ---------------------------------------------------------------------------
+write.csv(mantel_table, "outputs/phase4/mantel_results.csv", row.names = FALSE)
+cat("Wrote outputs/phase4/mantel_results.csv\n")
