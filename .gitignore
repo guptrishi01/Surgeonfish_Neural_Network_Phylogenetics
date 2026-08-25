@@ -31,3 +31,12 @@ todo.txt
 *.zip
 *.png
 
+# NOTE: results are deliberately NOT ignored. The rule above is about large,
+# regeneratable *binaries*; the result tables under outputs/ and reports/ are
+# the scientific record - small CSVs (tens of KB) that every number in
+# README.md traces back to. A clone has to be able to check those numbers
+# without re-running a GPU pipeline, so they are tracked on purpose.
+# Deliberately excluded from that: the per-run diagnostic bundles the Phase 2
+# notebook produces for visual review (pattern_diagnostics*.zip, tens of MB,
+# regenerated on demand), already covered by the *.zip rule above.
+

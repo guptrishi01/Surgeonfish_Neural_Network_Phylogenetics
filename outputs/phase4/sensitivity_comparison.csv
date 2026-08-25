@@ -1,0 +1,4 @@
+"dimension","kmult_p_primary","kmult_p_sensitivity","kmult_verdict_stable","mantel_p_primary","mantel_p_sensitivity","mantel_verdict_stable"
+"color",0.027,0.018,TRUE,0.027,0.045,TRUE
+"stripe",0.378,0.379,TRUE,0.568,0.621,TRUE
+"spot",0.066,0.135,TRUE,0.036,0.1185,FALSE
