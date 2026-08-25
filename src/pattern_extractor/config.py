@@ -160,6 +160,58 @@ class StripeConfig:
 
 
 @dataclass
+class ValidationConfig:
+    """Settings for the manually-labeled validation split.
+
+    Not a train/test split for a learned model - every pattern_extractor
+    feature is classical CV (k-means clustering, region geometry, FFT
+    periodicity) with no learned parameters to overfit. This exists to
+    answer a narrower question: do the extracted features actually track
+    what a human would call each image's pattern, checked against a sample
+    the extraction thresholds weren't tuned against by eye? Built after
+    three threshold fixes in a row (RegionConfig.min_region_area_fraction,
+    StripeConfig.max_stripe_width_fraction, StripeConfig.
+    min_periodicity_cycles) each found a genuinely different real confound
+    (a fixed noise floor, wide shading regions, an inverted periodicity
+    signal) without fully closing the gap - two further confounds (fin-ray
+    anatomy, image blur/noise texture) were still visible in the same
+    diagnostic that found the first three, which is exactly the class of
+    judgment call this project's own dataset_builder/quality_filter.py
+    already learned needs a human, not another geometric heuristic (see
+    CLAUDE.md's Data capture section).
+
+    Attributes:
+        sample_fraction: Target fraction of each species' non-reference
+            images to include in the manual-labeling sample.
+        min_per_species: Minimum images sampled per species, even if
+            sample_fraction would round to 0 for a sparse species - every
+            species gets at least one manually-labeled data point.
+        random_seed: Seed for sample selection, so re-running reproduces
+            the same sample instead of a new one each time.
+        labeling_html_path: Where the self-contained labeling page is
+            written.
+        labels_json_path: Where the manual labels exported from the
+            labeling page's "Export labels" button are expected once
+            downloaded and placed here.
+        report_csv_path: Where the per-image comparison report (extracted
+            features vs. manual labels) is written.
+    """
+
+    sample_fraction: float = 0.2
+    min_per_species: int = 1
+    random_seed: int = 0
+    labeling_html_path: Path = field(
+        default_factory=lambda: Path("reports/pattern_validation_labeling.html")
+    )
+    labels_json_path: Path = field(
+        default_factory=lambda: Path("reports/pattern_validation_labels.json")
+    )
+    report_csv_path: Path = field(
+        default_factory=lambda: Path("reports/pattern_validation_report.csv")
+    )
+
+
+@dataclass
 class PipelineConfig:
     """Top-level configuration for the pattern-extraction pipeline.
 
