@@ -146,11 +146,11 @@ cat("\n")
 # physignal.z p-values (Benjamini-Hochberg / FDR - see header comment).
 # ---------------------------------------------------------------------------
 cat("=== Step 5: multiple-comparisons correction ===\n")
-raw_p <- sapply(physignal_results, function(r) r$P.value)
+raw_p <- sapply(physignal_results, function(r) r$pvalue)
 corrected_p <- p.adjust(raw_p, method = "BH")
 results_table <- data.frame(
   dimension = dimensions,
-  K = sapply(physignal_results, function(r) r$phy.signal),
+  K = sapply(physignal_results, function(r) r$K),
   Z = sapply(physignal_results, function(r) r$Z),
   raw_p = raw_p,
   bh_corrected_p = corrected_p
