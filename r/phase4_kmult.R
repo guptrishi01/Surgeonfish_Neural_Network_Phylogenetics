@@ -41,23 +41,42 @@
 #     less conservative default - swap for p.adjust(method = "bonferroni")
 #     if a more conservative correction is preferred).
 #
-# Secondary test (Steps 6-8): phylogenetically-permuted Mantel check per
+# Secondary test (Steps 6-8): standard (label-permutation) Mantel check per
 # dimension, using Phase 3's already-built pattern-distance matrices
 # (outputs/{color,stripe,spot}_distance_matrix.csv) against its patristic
-# distance matrix (outputs/patristic_distance_matrix.csv). Per Harmon &
-# Glor (2010) - the paper that motivated this project's whole
-# Kmult-over-Mantel decision - naive label-shuffling permutation inflates
-# Mantel's type-I error when both matrices carry phylogenetic
-# autocorrelation; their remedy is to build the null distribution by
-# simulating trait evolution ON THE REAL TREE (Brownian motion) rather
-# than permuting species labels. Implemented here using ape::rTraitCont()
-# (its real signature confirmed against the CRAN manual before writing
-# this - not guessed, see CLAUDE.md's "no guessing on unfamiliar
-# library/API surfaces" rule, added after this script's first draft
-# guessed a geomorph field name and crashed on real data) plus base R's
-# cor()/lower.tri()/dist() for the Mantel statistic itself, deliberately
-# avoiding another unfamiliar package's Mantel implementation (e.g.
-# vegan::mantel()) where the risk of a repeat guessing mistake is real.
+# distance matrix (outputs/patristic_distance_matrix.csv).
+#
+# A first version of this section (v4.2.0) tried to implement Harmon &
+# Glor's (2010) phylogenetically-permuted-null remedy directly - simulate
+# trait evolution under Brownian motion on the real tree, and compare the
+# real Mantel r against that simulated null. Run for real, it produced
+# near-1.0 p-values for every dimension regardless of the (already
+# Kmult-verified) real signal - a degenerate result, not a real finding.
+# Root cause, found by re-reading this project's OWN already-verified
+# README finding on this exact point (Phase 4's Context section, checked
+# against the paper's actual abstract months earlier) rather than
+# guessing again: Harmon & Glor's remedy specifically targets THREE-way
+# Mantel tests (comparing two independently-measured, both
+# phylogenetically-confounded matrices to EACH OTHER); this project's
+# test is TWO-way (one measured pattern-distance matrix against the
+# fixed, exactly-known patristic matrix) - the same paper says a K-statistic
+# (Kmult, already the primary test here) is the right tool for that case,
+# not Mantel. A BM-simulated null is also structurally the wrong shape for
+# a two-way test regardless: BM trait divergence is *by definition*
+# proportional to patristic distance, so a null built from simulated BM
+# traits is closer to "the theoretical ceiling of possible phylogenetic
+# correlation" than to "no association" - real, noisy biological data will
+# almost always look weaker than that ceiling, biasing every dimension
+# toward non-significance no matter the truth.
+#
+# Standard (label-shuffle) Mantel permutation is used instead: permute one
+# matrix's species order relative to the other's (preserving the real,
+# fixed patristic matrix as the reference) and recompute the correlation
+# each time - a legitimate, well-understood null for exactly this
+# fixed-reference two-way case, using nothing beyond base R (`sample()`,
+# `cor()`, `lower.tri()`). Carries the standard Mantel-test caveats only
+# (not the phylogenetically-inflated-type-I-error risk Harmon & Glor
+# describe for the three-way case this project's design doesn't match).
 #
 # THIS SECTION (Steps 6-8) IS NEWER AND LESS-TESTED THAN STEPS 0-5, WHICH
 # HAVE ALREADY BEEN RUN SUCCESSFULLY ON REAL DATA. It has not yet been
@@ -180,12 +199,11 @@ write.csv(results_table, "outputs/phase4/kmult_results.csv", row.names = FALSE)
 cat("Wrote outputs/phase4/kmult_results.csv\n\n")
 
 # ---------------------------------------------------------------------------
-# Step 6: secondary test - phylogenetically-permuted Mantel check per
-# dimension. See the header comment for the full method and why
-# ape::rTraitCont() (verified) plus base R (not another unfamiliar
-# package's Mantel implementation) was used.
+# Step 6: secondary test - standard (label-permutation) Mantel check per
+# dimension. See the header comment for why this replaced an earlier,
+# statistically-degenerate BM-simulation-based attempt.
 # ---------------------------------------------------------------------------
-cat("=== Step 6: secondary test - phylogenetically-permuted Mantel ===\n")
+cat("=== Step 6: secondary test - standard Mantel (label permutation) ===\n")
 
 mantel_r <- function(dist_a, dist_b) {
   # Pearson correlation between corresponding lower-triangle entries of two
@@ -197,7 +215,7 @@ mantel_r <- function(dist_a, dist_b) {
 }
 
 n_permutations <- 1000
-set.seed(1)  # fixed seed - the simulated null distribution below is stochastic,
+set.seed(1)  # fixed seed - the permuted null distribution below is stochastic,
              # unlike physignal.z's own RRPP scheme (seed = NULL is already
              # deterministic there); without a fixed seed here, re-running
              # this section would jitter the Mantel p-values slightly each time.
@@ -228,20 +246,18 @@ for (dim in dimensions) {
 
   observed_r <- mantel_r(pattern_dist, patristic)
 
-  n_features <- ncol(data_by_dimension[[dim]])  # same dimensionality Step 3 used for physignal.z
+  n_species <- nrow(pattern_dist)
   null_r <- numeric(n_permutations)
   for (i in seq_len(n_permutations)) {
-    sim_traits <- sapply(seq_len(n_features), function(j) rTraitCont(phy, model = "BM"))
-    rownames(sim_traits) <- phy$tip.label  # explicit, not assumed - see header comment
-    sim_dist <- as.matrix(dist(sim_traits))
-    sim_dist <- sim_dist[species_order, species_order]
-    null_r[i] <- mantel_r(sim_dist, patristic)
+    perm <- sample(n_species)
+    permuted_dist <- pattern_dist[perm, perm]
+    null_r[i] <- mantel_r(permuted_dist, patristic)
   }
 
   p_value <- mean(abs(null_r) >= abs(observed_r))
   mantel_results[[dim]] <- list(observed_r = observed_r, p_value = p_value)
   cat(sprintf(
-    "%s: observed Mantel r = %.4f, phylogenetically-permuted p = %.4f (n=%d sims)\n",
+    "%s: observed Mantel r = %.4f, standard-Mantel p = %.4f (n=%d permutations)\n",
     dim, observed_r, p_value, n_permutations
   ))
 }
