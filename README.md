@@ -6,8 +6,8 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.2.0** — all planned phases (0–5) complete and audited; stripe detection
-recalibrated against real masks, with the Kmult re-run pending. See
+**Version 6.3.0** — all planned phases (0–5) complete, audited, and re-verified after
+the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
 pattern-genetics literature review.
@@ -39,28 +39,26 @@ developmental mechanism.
 Across **49 species** with real genetic-data phylogenetic placement
 ([`reports/species_features.csv`](reports/species_features.csv)):
 
-| dimension | Mantel *r* | Mantel BH *p* | Kmult BH *p* | verdict |
-| --- | --- | --- | --- | --- |
-| **colour** | +0.134 | **0.022** ✅ | *re-run pending* | **signal detected** |
-| spot | +0.100 | **0.030** ✅ | *re-run pending* | significant (secondary); fragile — see below |
-| stripe | +0.025 | 0.565 | *re-run pending* | null |
+| dimension | Kmult K | Kmult Z | Kmult BH *p* | Mantel *r* | Mantel BH *p* | verdict |
+| --- | --- | --- | --- | --- | --- | --- |
+| **colour** | 0.0062 | 2.20 | **0.027** ✅ | +0.134 | **0.027** ✅ | **signal detected** |
+| spot | 0.0362 | 1.71 | 0.066 | +0.100 | 0.036 | not significant (primary) |
+| stripe | 0.0081 | −0.73 | 0.569 | +0.025 | 0.539 | null |
 
-*Secondary test: label-permutation Mantel (10,000 permutations) —
-[`outputs/phase4/mantel_results.csv`](outputs/phase4/mantel_results.csv),
+*Primary test: `geomorph::physignal.z` — [`outputs/phase4/kmult_results.csv`](outputs/phase4/kmult_results.csv).
+Secondary: label-permutation Mantel — [`outputs/phase4/mantel_results.csv`](outputs/phase4/mantel_results.csv).
 Benjamini–Hochberg corrected across the three dimensions.*
 
 **Colour pattern shows weak but robust phylogenetic signal. Stripe and spot do not.**
 
-> **Kmult (the primary test) is being re-run.** The stripe detector was recalibrated
-> against the real SAM 2 masks in v6.2.0 (recall 14.3% → 50.0%), which changes the
-> stripe features feeding every downstream test. Phases 2 and 3 were re-run locally
-> and the Mantel column above reflects the new features; `geomorph::physignal.z`
-> needs R, so it is regenerated via [`notebooks/Followups.ipynb`](notebooks/Followups.ipynb).
-> The pre-recalibration Kmult results are preserved in
-> [`outputs/phase4_pre_recalibration/`](outputs/phase4_pre_recalibration/) rather than
-> left in place looking current. **Colour and spot are unaffected by the change** —
-> their features are bit-identical before and after, and their Mantel values are
-> unchanged — so only the stripe verdict is genuinely open.
+> **Re-verified after the stripe recalibration.** The stripe detector was recalibrated
+> against real SAM 2 masks in v6.2.0 (recall 14.3% → 50.0%), changing the stripe features
+> feeding every downstream test, so Phases 2–4 were all re-run. The re-run doubles as a
+> control: **colour and spot are untouched by the change, and their Kmult statistics agree
+> with the pre-recalibration run to 13 significant figures** (colour K 0.00622579641292539
+> → …559), with identical corrected *p*-values. Stripe is the only thing that moved.
+> Pre-recalibration results are kept in
+> [`outputs/phase4_pre_recalibration/`](outputs/phase4_pre_recalibration/).
 
 **The stripe null is now interpretable, which it previously wasn't.** At ~14% recall a
 null couldn't be distinguished from "stripes weren't measured well enough." At 50%
@@ -72,18 +70,23 @@ fish rather than about the instrument.
 Re-running everything with the two sparsest species dropped (49 → 47;
 [`outputs/phase4_min5/mantel_results.csv`](outputs/phase4_min5/mantel_results.csv)):
 
-| dimension | Mantel 49 → 47 | verdict stable? |
-| --- | --- | --- |
-| colour | 0.022 → **0.042** | ✅ |
-| stripe | 0.565 → 0.540 | ✅ |
-| spot | 0.030 → **0.112** | ❌ loses significance |
+| dimension | Kmult 49 → 47 | Mantel 49 → 47 | verdict stable? |
+| --- | --- | --- | --- |
+| colour | 0.027 → **0.018** | 0.027 → **0.045** | ✅ both |
+| stripe | 0.569 → 0.545 | 0.539 → 0.550 | ✅ both |
+| spot | 0.066 → 0.135 | 0.036 → **0.119** | ✅ primary / ❌ secondary |
 
-**Colour survives; spot does not.** Colour stays significant when the two sparsest
-species are dropped. Spot's significance disappears (0.030 → 0.112) — direct evidence
-that it rested on *Naso tuberosus* (2 images) and *Acanthurus triostegus* (4). Spot was
-already non-significant under the primary test before recalibration, so no headline
-conclusion depends on it; had the significant secondary result been reported instead,
-this check would have shown that claim to be an artifact.
+**Every primary-test verdict is stable.** Colour stays significant and strengthens. The
+one flip is spot's *secondary* result, which loses significance (0.036 → 0.119) when
+*Naso tuberosus* (2 images) and *Acanthurus triostegus* (4) are dropped — direct evidence
+that it rested on those two species. Because the preregistered plan makes Kmult primary,
+spot was already being reported as non-significant, so no headline conclusion depends on
+it. Had the significant secondary result been reported instead, this check would have
+shown that claim to be an artifact.
+
+Cross-dimension comparison also shifted with the better stripe measurement: colour still
+carries significantly more signal than stripe (*p*=0.040, was 0.014), but spot-vs-stripe
+is no longer significant (*p*=0.088, was 0.033).
 
 Cross-dimension comparison (`compare.physignal.z`) agrees: colour and spot each
 carry more signal than stripe (*p*=0.014, 0.033) but are indistinguishable from
@@ -349,14 +352,28 @@ are actionable and unfinished.
 
 | # | item | why it matters |
 | --- | --- | --- |
-| 1 | **Register a GBIF derived-dataset DOI** | GBIF's own guidance requires this for search-API pulls. **Blocks publication** — the only hard blocker here. |
+| 1 | **Register the GBIF derived-dataset DOI** — the table is built and ready | All 1,878 occurrences resolved to 5 source datasets ([`outputs/gbif_derived_dataset.csv`](outputs/gbif_derived_dataset.csv)). Only the registration itself remains, at [gbif.org/derived-dataset/register](https://www.gbif.org/derived-dataset/register). **Blocks publication.** |
 | 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
-| 3 | **Numerical-equivalence check for the *patternize* port** | The colour clustering is a Python reimplementation never checked against the R package — and colour is the dimension carrying the headline result. |
-| 4 | **Cross-check the synonym table** against FishBase or Eschmeyer's Catalog of Fishes | One species' inclusion currently rests on an NCBI-derived table that isn't a fish taxonomic authority. |
-| 5 | **Consider dropping the redundant thresholded proportions** | `prop_solid`/`prop_striped`/`prop_spotted` duplicate their own continuous measures (\|r\| = 0.80–0.95). Re-running without them would show whether the result depends on that redundancy. |
+| 3 | **A *conclusive* patternize equivalence check** | A first attempt ran (see below) but is confounded and neither confirms nor refutes the port. Colour carries the headline result, so this remains the largest unquantified risk. |
+| 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
+| 5 | ~~Test dropping the redundant thresholded proportions~~ — **done** | Every verdict is unchanged without them; the result does not depend on the redundancy. |
 
-Item 3 is worth flagging as the largest unquantified risk in the pipeline: it
-sits directly upstream of the only significant finding.
+Item 3 remains the largest unquantified risk in the pipeline: it sits directly upstream
+of the only significant finding.
+
+### The patternize check, and why it's inconclusive
+
+Running `patternize::kImage()` with the same `startCenter` matrix our implementation used
+gives cluster fractions that differ by 0.11–0.26 on three test images. That sounds
+alarming but does not mean the port is wrong — **the comparison is confounded**.
+`kImage()` clusters the entire raster including the grey background of the mask cutout,
+while `pattern_extractor` clusters masked-in pixels only, so the two are partitioning
+different pixel sets. The dominant-cluster structure agrees qualitatively (both find one
+large cluster and a tail of smaller ones) but the magnitudes are not comparable.
+
+A conclusive version needs `kImage()`'s `maskToNA` argument to exclude the background so
+both implementations see the same pixels. Until then the port is **unvalidated, not
+invalidated** — the check as run establishes neither.
 
 ---
 
