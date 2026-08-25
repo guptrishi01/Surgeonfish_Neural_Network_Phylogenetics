@@ -166,6 +166,22 @@ class StripeConfig:
     pipeline should be re-checked via the same notebook validation loop,
     not assumed identical.
 
+    KNOWN, ACCEPTED LIMITATION (confirmed on the real Colab run, real SAM2
+    masks, not just the local approximation): `stripe_present` sits at 81%
+    overall agreement but only ~14% recall (missed 24 of 28 manually-
+    labeled real stripe patterns, including every sampled image of
+    Acanthurus olivaceus, A. leucosternon, and most of Zebrasoma
+    veliferum). F1-maximizing calibration produces a conservative
+    detector: few false alarms (6 of 127 non-striped images misflagged),
+    but a `stripe_present=False` should NOT be read as "confidently not
+    striped" - it's frequently a miss. This trade-off was evaluated and
+    deliberately kept (re-tuning for recall, e.g. via an F2-weighted grid
+    search, was considered and declined) - documenting it here rather
+    than silently trusting the aggregate accuracy number is the point.
+    Any downstream use of this column (Phase 3 aggregation, distance
+    matrices) should treat True as a reasonably confident positive and
+    False as "not confidently determined," not as a real negative.
+
     Attributes:
         min_eccentricity_for_stripe: A region's eccentricity must be at
             least this high to count as elongated/stripe-like. 0.97
