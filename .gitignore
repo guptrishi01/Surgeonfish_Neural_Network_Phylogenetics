@@ -40,3 +40,8 @@ todo.txt
 # notebook produces for visual review (pattern_diagnostics*.zip, tens of MB,
 # regenerated on demand), already covered by the *.zip rule above.
 
+
+# Coverage data
+.coverage
+coverage.xml
+htmlcov/

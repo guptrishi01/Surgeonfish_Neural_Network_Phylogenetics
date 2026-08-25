@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.0.0** — all planned phases (0–5) complete. See
+**Version 6.1.0** — all planned phases (0–5) complete and audited. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
 pattern-genetics literature review.
@@ -157,7 +157,7 @@ git clone https://github.com/guptrishi01/Surgeonfish_Neural_Network_Phylogenetic
 cd Surgeonfish_Neural_Network_Phylogenetics
 pip install -e .            # base: requests, Pillow, numpy, scipy, biopython
 pip install -e ".[vision]"  # adds torch/transformers/sam2 - only for Phase 1
-pytest                      # 183 tests, no GPU needed
+pytest                      # 206 tests, no GPU needed
 ```
 
 | phase | notebook | runtime | notes |
@@ -270,6 +270,14 @@ pipeline.
 ## Limitations
 
 - **Weak effect sizes.** Detectable, not strong. See "How to read these numbers."
+- **Features within a dimension are partly redundant.** Each dimension carries
+  both a continuous measure and a proportion thresholded from that same
+  measure, so they correlate strongly by construction: `mean_hue_dispersion` ~
+  `prop_solid` (*r*=−0.95), `mean_elongated_region_count` ~ `prop_striped`
+  (*r*=+0.92), `mean_spot_count` ~ `prop_spotted` (*r*=+0.80). The matrices stay
+  well-conditioned (condition numbers 7.5 / 5.4 / 3.2) so the tests are valid,
+  but "4 colour features" overstates the independent information — the
+  effective dimensionality is lower than the feature count suggests.
 - **Stripe detection has ~14% recall.** `stripe_present=False` means "not
   confidently detected," not "confirmed absent." The stripe null is therefore
   inconclusive about biology.
@@ -296,12 +304,41 @@ rather than a preregistered test. Every statistical choice here was pinned in
 writing before the tests ran ([METHODS.md](METHODS.md)), and every phase was
 verified against real output before the next began.
 
-**Phase 5 (this documentation rewrite) was the last planned phase.** Phase 6 — checking
-whether the 56 candidate genes from [BACKGROUND.md](BACKGROUND.md) appear in
-the 16 available genome assemblies — was always contingent on Phase 4 finding
-significance. It technically did, for colour, but at K≈0.006 that is thin
-justification for committing to a genomics phase, and it remains deliberately
-unscoped.
+**Phase 5 (this documentation rewrite) was the last planned phase.**
+
+### Phase 6 was scoped and deliberately not pursued
+
+Phase 6 — checking whether the 56 candidate genes from
+[BACKGROUND.md](BACKGROUND.md) appear in available genome assemblies — was
+always contingent on Phase 4 finding significance. It technically did, for
+colour. The phase was then scoped properly, and the evidence does not support
+running it:
+
+| constraint | value |
+| --- | --- |
+| species with a public genome assembly | 16 of 64 |
+| …**also** in the 49-species analysis set | **14** |
+| …at chromosome level (rest are scaffold) | **1** |
+| Acanthuridae skin transcriptomes in the literature | **0** |
+
+At n=14, a genotype–phenotype correlation would need **|r| ≥ 0.78** to survive
+correction across the 52 colour candidate genes. Power to detect a true
+*r*=0.5 — already strong for a polygenic trait — is **6.9%**. For scale, the
+phenotype signal this would be chasing is *r*=0.13.
+
+So a null result would be uninterpretable (no power to distinguish "no
+association" from "couldn't have seen one"), while a positive result at n=14
+across 52 genes would more likely be noise — which is precisely the
+data-dredging failure mode this project was rebuilt to escape. The
+presence/absence half is feasible but near-vacuous: teleost pigmentation genes
+are deeply conserved, so finding them in a surgeonfish genome is close to
+guaranteed and says nothing about pattern variation. The expression half has no
+data to run on at all.
+
+**The higher-value next step is measurement, not genomics:** fixing
+`stripe_present`'s ~14% recall. Stripe is currently the one dimension where the
+biological question is unanswerable for a fixable reason — the detector, not
+nature.
 
 ---
 
