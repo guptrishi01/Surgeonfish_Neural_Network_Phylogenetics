@@ -108,16 +108,47 @@ class RegionConfig:
 class SpotConfig:
     """Thresholds for classifying regions as spot/freckle-like.
 
+    All three thresholds empirically calibrated (v2.2.2) against the same
+    155-image manually-labeled validation sample used for StripeConfig,
+    reusing the identical region data (same `non_dominant_cluster_regions()`
+    call, same images) - grid-searched maximizing F1. Triggered by a real
+    regression: v2.2.1's clustering redesign (hue/saturation vector space
+    instead of raw RGB) changed which pixels land in which cluster, which
+    changed spot region detection as a side effect even though SpotConfig
+    itself wasn't touched that round - agreement on the real Colab run
+    dropped from 62% to 55% (16% precision, 65 false positives against 12
+    true positives) purely from that side effect. Same caveat as
+    StripeConfig's calibrated thresholds: this round's calibration used
+    masks approximated by a corner flood-fill, not real SAM2 masks -
+    production accuracy should be re-checked via the same notebook
+    validation loop, not assumed identical.
+
     Attributes:
         max_eccentricity_for_spot: A region's eccentricity (0 = circle, close
             to 1 = elongated line) must be at or below this to count as
-            spot-like rather than stripe-like.
+            spot-like rather than stripe-like. 0.9 (up from 0.8) - the
+            calibration grid found a slightly looser eccentricity cutoff
+            scored better once paired with the new area cap below.
+        max_spot_area_fraction: A region's area must be at most this
+            fraction of the image's total masked-in (fish) pixel count to
+            count as spot-like. New this round - previously unbounded,
+            unlike StripeConfig's already-bounded width, so a large round
+            region (a genuine anatomical patch, not a freckle) could count
+            as one giant "spot" with no size limit. 0.02 was the value the
+            calibration grid consistently preferred across every other
+            parameter combination tested.
         min_spot_count_for_presence: At least this many spot-like regions
-            must be found for the image to be called "spotted."
+            must be found for the image to be called "spotted." 12 (up
+            from 3) - real photos have a handful of small round-ish noise
+            regions (texture, JPEG artifacts) even on genuinely
+            non-spotted fish; only genuinely freckled/spotted patterns
+            accumulate this many after the area cap above already filters
+            out large non-spot regions.
     """
 
-    max_eccentricity_for_spot: float = 0.8
-    min_spot_count_for_presence: int = 3
+    max_eccentricity_for_spot: float = 0.9
+    max_spot_area_fraction: float = 0.02
+    min_spot_count_for_presence: int = 12
 
 
 @dataclass

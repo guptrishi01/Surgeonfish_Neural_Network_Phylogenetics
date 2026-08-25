@@ -20,8 +20,9 @@ class SpotFeatures:
     """Spot-dimension features for one image.
 
     Attributes:
-        spot_count: Number of spot-like (small, roughly round) regions
-            found across all non-dominant clusters.
+        spot_count: Number of spot-like (small, roughly round, bounded
+            area - see SpotConfig.max_spot_area_fraction) regions found
+            across all non-dominant clusters.
         mean_spot_area: Mean pixel area of spot-like regions (0 if none).
         area_std: Standard deviation of spot-like region areas (0 if <2).
         spot_present: True if spot_count meets the configured minimum.
@@ -54,9 +55,11 @@ def extract_spot_features(
         SpotFeatures for this image.
     """
     regions = non_dominant_cluster_regions(cluster_result, region_config.min_region_area_fraction)
+    total_masked_pixels = len(cluster_result.mask_coords[0])
+    max_area = spot_config.max_spot_area_fraction * total_masked_pixels
     spot_areas = [
         region.area for region in regions
-        if region.eccentricity <= spot_config.max_eccentricity_for_spot
+        if region.eccentricity <= spot_config.max_eccentricity_for_spot and region.area <= max_area
     ]
 
     spot_count = len(spot_areas)

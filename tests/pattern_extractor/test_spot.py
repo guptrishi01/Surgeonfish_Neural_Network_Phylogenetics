@@ -15,15 +15,23 @@ def _cluster_result_for(image: np.ndarray, mask: np.ndarray, k: int):
     return assign_clusters(image, mask, reference_centers, clustering_config)
 
 
-def _spotted_image(size=(60, 60)):
+def _spotted_image(size=(120, 120), rows=5, cols=5):
+    # v2.2.2 calibrated min_spot_count_for_presence against real photos to
+    # 12 (up from 3) - real solid-coloured fish routinely have a handful of
+    # small round-ish noise regions (texture, JPEG artifacts), so a 5-spot
+    # image no longer clears the bar. A genuinely freckled/spotted pattern
+    # should have many more repeats than that anyway - a grid of spots
+    # represents that more honestly than a borderline case tuned to pass.
     height, width = size
     image = np.full((height, width, 3), (30, 150, 40), dtype=np.uint8)  # green base
     mask = np.ones((height, width), dtype=bool)
-    centers = [(10, 10), (10, 40), (30, 25), (45, 12), (45, 45)]
-    for cy, cx in centers:
-        yy, xx = np.ogrid[:height, :width]
-        blob = (yy - cy) ** 2 + (xx - cx) ** 2 <= 4**2
-        image[blob] = (200, 30, 30)  # red spots
+    yy, xx = np.ogrid[:height, :width]
+    row_positions = np.linspace(height * 0.15, height * 0.85, rows)
+    col_positions = np.linspace(width * 0.15, width * 0.85, cols)
+    for cy in row_positions:
+        for cx in col_positions:
+            blob = (yy - cy) ** 2 + (xx - cx) ** 2 <= 4**2
+            image[blob] = (200, 30, 30)  # red spots
     return image, mask
 
 
@@ -33,7 +41,7 @@ def test_spotted_image_is_detected_as_spot_present():
 
     features = extract_spot_features(cluster_result, RegionConfig(), SpotConfig())
 
-    assert features.spot_count >= 3
+    assert features.spot_count >= 12
     assert features.spot_present is True
     assert features.mean_spot_area > 0
 
