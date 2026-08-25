@@ -6,7 +6,8 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.1.1** — all planned phases (0–5) complete and audited. See
+**Version 6.2.0** — all planned phases (0–5) complete and audited; stripe detection
+recalibrated against real masks, with the Kmult re-run pending. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
 pattern-genetics literature review.
@@ -38,37 +39,51 @@ developmental mechanism.
 Across **49 species** with real genetic-data phylogenetic placement
 ([`reports/species_features.csv`](reports/species_features.csv)):
 
-| dimension | Kmult K | Kmult Z | Kmult BH *p* | Mantel *r* | Mantel BH *p* | verdict |
-| --- | --- | --- | --- | --- | --- | --- |
-| **colour** | 0.0062 | 2.20 | **0.027** ✅ | +0.134 | **0.027** ✅ | **signal detected** |
-| spot | 0.0362 | 1.71 | 0.066 | +0.100 | 0.036 | not significant (primary) |
-| stripe | 0.0099 | −1.32 | 0.378 | −0.026 | 0.568 | null |
+| dimension | Mantel *r* | Mantel BH *p* | Kmult BH *p* | verdict |
+| --- | --- | --- | --- | --- |
+| **colour** | +0.134 | **0.022** ✅ | *re-run pending* | **signal detected** |
+| spot | +0.100 | **0.030** ✅ | *re-run pending* | significant (secondary); fragile — see below |
+| stripe | +0.025 | 0.565 | *re-run pending* | null |
 
-*Primary test: `geomorph::physignal.z` — [`outputs/phase4/kmult_results.csv`](outputs/phase4/kmult_results.csv).
-Secondary: label-permutation Mantel — [`outputs/phase4/mantel_results.csv`](outputs/phase4/mantel_results.csv).
+*Secondary test: label-permutation Mantel (10,000 permutations) —
+[`outputs/phase4/mantel_results.csv`](outputs/phase4/mantel_results.csv),
 Benjamini–Hochberg corrected across the three dimensions.*
 
 **Colour pattern shows weak but robust phylogenetic signal. Stripe and spot do not.**
 
+> **Kmult (the primary test) is being re-run.** The stripe detector was recalibrated
+> against the real SAM 2 masks in v6.2.0 (recall 14.3% → 50.0%), which changes the
+> stripe features feeding every downstream test. Phases 2 and 3 were re-run locally
+> and the Mantel column above reflects the new features; `geomorph::physignal.z`
+> needs R, so it is regenerated via [`notebooks/Followups.ipynb`](notebooks/Followups.ipynb).
+> The pre-recalibration Kmult results are preserved in
+> [`outputs/phase4_pre_recalibration/`](outputs/phase4_pre_recalibration/) rather than
+> left in place looking current. **Colour and spot are unaffected by the change** —
+> their features are bit-identical before and after, and their Mantel values are
+> unchanged — so only the stripe verdict is genuinely open.
+
+**The stripe null is now interpretable, which it previously wasn't.** At ~14% recall a
+null couldn't be distinguished from "stripes weren't measured well enough." At 50%
+recall, stripe still shows no signal (*r* = +0.025) — that is now a result about the
+fish rather than about the instrument.
+
 ### Robustness
 
 Re-running everything with the two sparsest species dropped (49 → 47;
-[`outputs/phase4/sensitivity_comparison.csv`](outputs/phase4/sensitivity_comparison.csv)):
+[`outputs/phase4_min5/mantel_results.csv`](outputs/phase4_min5/mantel_results.csv)):
 
-| dimension | Kmult 49 → 47 | Mantel 49 → 47 | verdict stable? |
-| --- | --- | --- | --- |
-| colour | 0.027 → **0.018** | 0.027 → **0.045** | ✅ both |
-| stripe | 0.378 → 0.379 | 0.568 → 0.621 | ✅ both |
-| spot | 0.066 → 0.135 | 0.036 → **0.119** | ✅ primary / ❌ secondary |
+| dimension | Mantel 49 → 47 | verdict stable? |
+| --- | --- | --- |
+| colour | 0.022 → **0.042** | ✅ |
+| stripe | 0.565 → 0.540 | ✅ |
+| spot | 0.030 → **0.112** | ❌ loses significance |
 
-**Every primary-test verdict is stable.** Colour stays significant and in fact
-strengthens. The one flip is spot's *secondary* result, which loses
-significance when *Naso tuberosus* (2 images) and *Acanthurus triostegus* (4)
-are removed — direct evidence that spot's apparent Mantel significance rested
-on two sparse species. Because the preregistered plan makes Kmult primary,
-spot was already being reported as non-significant, so no headline conclusion
-depends on it. Had the significant secondary result been reported instead, this
-check would have shown that claim to be an artifact.
+**Colour survives; spot does not.** Colour stays significant when the two sparsest
+species are dropped. Spot's significance disappears (0.030 → 0.112) — direct evidence
+that it rested on *Naso tuberosus* (2 images) and *Acanthurus triostegus* (4). Spot was
+already non-significant under the primary test before recalibration, so no headline
+conclusion depends on it; had the significant secondary result been reported instead,
+this check would have shown that claim to be an artifact.
 
 Cross-dimension comparison (`compare.physignal.z`) agrees: colour and spot each
 carry more signal than stripe (*p*=0.014, 0.033) but are indistinguishable from
@@ -82,10 +97,11 @@ each other (*p*=0.714).
    logit/`log1p` before testing; K is invariant to the linear standardisation
    that follows but **not** to those nonlinear transforms. Read K
    comparatively — across dimensions and species sets — not against K=1.
-3. **Stripe's null is doubly inconclusive.** The stripe detector itself has
-   only ~14% recall, so a null cannot distinguish "no phylogenetic signal in
-   stripes" from "stripes weren't measured well enough." This is the clearest
-   target for future work.
+3. **Stripe's null is now interpretable.** The detector was recalibrated in
+   v6.2.0 and reaches 50% recall (from ~14%), so a null is no longer confounded
+   with "not measured well enough." It is still a *low-powered* null — half of
+   real stripe patterns are missed, and precision is 40% — but it is a statement
+   about the fish, not only about the instrument.
 4. **Null results are inconclusive, not evidence of no association** (Harmon &
    Glor 2010).
 
@@ -108,7 +124,7 @@ data/extracted_fish/        mask-cutout crops, native resolution
         │  │  k-means    │  elongation │    blob     │   extractors
         │  │ hue/sat spc │  + FFT      │   shape     │
         │  └─────────────┴─────────────┴─────────────┘
-        │  validated against 155 hand labels: 70% / 81% / 80%
+        │  validated against 155 hand labels - see the honest table below
         ▼
 reports/pattern_features.csv        853 rows, one per image
         │
@@ -143,6 +159,34 @@ of these are checkable against the tracked files:
 | **excluded** | **604** | 605 − 1 |
 | **accepted** | **856** | 1,460 − 604 ✓ matches the log's accepted tally exactly |
 | pattern rows | **853** | 856 − 3 images removed at validation as invalid inputs regardless of pattern (a fin-only crop, a blown-out photo, a dried museum specimen) |
+
+---
+
+## How good are the pattern detectors?
+
+Measured against 155 hand-labelled images on real SAM 2 masks
+([`reports/pattern_validation_report.csv`](reports/pattern_validation_report.csv)):
+
+| feature | agreement | precision | recall | F1 | true positives |
+| --- | --- | --- | --- | --- | --- |
+| `is_solid` | 70.3% | 71.2% | 84.9% | 0.775 | 79 |
+| `stripe_present` | 77.4% | 40.0% | 50.0% | 0.444 | 14 |
+| `spot_present` | 80.0% | **10.5%** | **12.5%** | **0.114** | **2** |
+
+**Read the F1 column, not the agreement column.** Agreement is inflated by class
+imbalance — most images are not spotted, so a detector that almost never fires still
+scores ~80%. `spot_present` has the *highest* agreement of the three and is by far the
+worst detector: 2 true positives against 17 false positives across 155 images. Earlier
+versions of this README quoted its 80% as a validated success; that was misleading, and
+this table replaces it.
+
+**What this does and doesn't invalidate.** `spot_present` feeds exactly one of the ten
+per-species features (`prop_spotted`). The spot *dimension*'s signal comes from the
+continuous features (`mean_spot_count`, `mean_spot_area_fraction`), which are unaffected
+by the boolean's threshold — and independently corroborated: dropping the thresholded
+proportions entirely *strengthens* spot's Mantel result rather than weakening it
+(BH *p* 0.030 → 0.017). So the boolean is unreliable, not the dimension. Treat
+`spot_present` as unusable on its own.
 
 ---
 
@@ -278,9 +322,12 @@ pipeline.
   well-conditioned (condition numbers 7.5 / 5.4 / 3.2) so the tests are valid,
   but "4 colour features" overstates the independent information — the
   effective dimensionality is lower than the feature count suggests.
-- **Stripe detection has ~14% recall.** `stripe_present=False` means "not
-  confidently detected," not "confirmed absent." The stripe null is therefore
-  inconclusive about biology.
+- **`spot_present` is effectively non-functional** (F1 0.114, 2 true positives in
+  155 images). Use the continuous spot features instead; see the detector table.
+- **`stripe_present` reaches 50% recall at 40% precision** after the v6.2.0
+  recalibration. Better than the ~14% it replaced, but still noisy in both
+  directions — roughly half its positives are wrong and half of real stripes are
+  missed.
 - **Correlation, not mechanism.** These tests cannot separate inherited pattern
   from phylogenetically conserved ecology.
 - **n=49.** Small for comparative methods; power is limited and null results

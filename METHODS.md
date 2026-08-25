@@ -97,19 +97,53 @@ That comparison found the extractors were performing *worse than trivial
 baselines* and drove a full redesign (CHANGELOG v2.2.1–v2.2.3). Final agreement
 against real hand labels on real SAM 2 masks:
 
-| feature | agreement | note |
-| --- | --- | --- |
-| `is_solid` | **70%** | false positives skew toward one-dominant-colour fish with a small distinguishing patch |
-| `stripe_present` | **81%** | **recall only ~14%** — see below |
-| `spot_present` | **80%** | weakest F1 of the three |
+| feature | agreement | precision | recall | F1 | TP |
+| --- | --- | --- | --- | --- | --- |
+| `is_solid` | 70.3% | 71.2% | 84.9% | 0.775 | 79 |
+| `stripe_present` | 77.4% | 40.0% | 50.0% | 0.444 | 14 |
+| `spot_present` | 80.0% | **10.5%** | **12.5%** | **0.114** | **2** |
 
-**`stripe_present=False` must not be read as a confirmed negative.** The
-F1-optimising calibration produced a detector that rarely cries wolf but
-misses most real stripes (24 of 28 sampled stripe patterns). Re-tuning for
-recall was evaluated with a real F2-weighted grid search and **declined** —
-recall and precision are sharply anti-correlated for this signal, so raising
-recall collapsed precision system-wide. The conservative bias is deliberate
-and documented in `StripeConfig`'s docstring.
+Read F1, not agreement — agreement is inflated by class imbalance, which is why
+`spot_present` scores highest on it while being the worst detector by a wide
+margin (2 true positives against 17 false positives). `spot_present` should be
+treated as unusable on its own; the spot dimension's signal comes from the
+continuous features, not the boolean.
+
+**Stripe thresholds were recalibrated in v6.2.0, overturning an earlier
+conclusion.** The v2.2.1 calibration ran against masks *approximated* by a corner
+flood-fill and carried an explicit caveat that production accuracy needed
+re-checking; v2.2.3 then recorded that recall could not be raised without
+collapsing precision, and declined an F2-weighted re-tune on that basis.
+
+Re-running the same grid against the **real SAM 2 masks** shows that conclusion
+was an artifact of the approximation:
+
+| thresholds (eccentricity / count / width) | precision | recall | F1 |
+| --- | --- | --- | --- |
+| 0.97 / 20 / 0.12 (v2.2.1) | 40.0% | 14.3% | 0.211 |
+| **0.98 / 8 / 0.10 (current)** | 40.0% | **50.0%** | **0.444** |
+
+Recall triples at *identical* precision. Approximated masks generate far more
+spurious elongated regions than real ones, which is why a count threshold of 20
+looked necessary and is in fact far too high.
+
+The chosen values are the **consensus of 200 stratified split-half trials**
+(thresholds selected on one half, scored on the held-out half), not the single
+F1-maximising point on the full set — selecting and evaluating on the same data
+is the failure mode this pipeline exists to avoid. Held-out F1 improves 0.200 →
+0.336, with the re-tuned settings winning in 93.5% of trials.
+
+**Still read `stripe_present` cautiously.** Precision above ~50% is unreachable
+at any threshold combination in the grid, so roughly half its positives are
+wrong, and half of real stripe patterns are still missed. It is a
+moderate-confidence signal in both directions — much better than the ~14%-recall
+version it replaced, but not a confident one.
+
+**Periodicity is confirmed dead**, not merely unvalidated. Re-checked on real
+masks, its correlation with the hand labels is r=+0.020 / −0.092 / −0.066 at
+`min_cycles` 2/3/4 — indistinguishable from noise, with two of three pointing the
+wrong way. It is kept disabled rather than deleted so the mechanism and its
+negative result stay legible.
 
 ---
 

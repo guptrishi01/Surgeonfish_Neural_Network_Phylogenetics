@@ -166,44 +166,63 @@ class StripeConfig:
     pipeline should be re-checked via the same notebook validation loop,
     not assumed identical.
 
-    KNOWN, ACCEPTED LIMITATION (confirmed on the real Colab run, real SAM2
-    masks, not just the local approximation): `stripe_present` sits at 81%
-    overall agreement but only ~14% recall (missed 24 of 28 manually-
-    labeled real stripe patterns, including every sampled image of
-    Acanthurus olivaceus, A. leucosternon, and most of Zebrasoma
-    veliferum). F1-maximizing calibration produces a conservative
-    detector: few false alarms (6 of 127 non-striped images misflagged),
-    but a `stripe_present=False` should NOT be read as "confidently not
-    striped" - it's frequently a miss. This trade-off was evaluated and
-    deliberately kept (re-tuning for recall, e.g. via an F2-weighted grid
-    search, was considered and declined) - documenting it here rather
-    than silently trusting the aggregate accuracy number is the point.
-    Any downstream use of this column (Phase 3 aggregation, distance
-    matrices) should treat True as a reasonably confident positive and
-    False as "not confidently determined," not as a real negative.
+    RECALIBRATED AGAINST REAL SAM2 MASKS (v6.2.0). The v2.2.1 thresholds
+    (eccentricity 0.97 / count 20 / width 0.12) were calibrated on masks
+    approximated by a corner flood-fill, with an explicit caveat that
+    production accuracy needed re-checking. That check was finally run
+    against the real masks and overturned one of its conclusions: v2.2.3
+    had recorded that recall could not be raised without collapsing
+    precision (an F2-weighted search was tried and declined), but on real
+    masks a materially better operating point exists. Re-running the same
+    grid against the same 155 hand labels, now with real masks:
+
+        shipped (0.97 / 20 / 0.12):  precision 40.0%  recall 14.3%  F1 0.211
+        current (0.98 /  8 / 0.10):  precision 40.0%  recall 50.0%  F1 0.444
+
+    Recall triples at *identical* precision. The values here are the
+    consensus of 200 stratified split-half trials (thresholds chosen on
+    one half, scored on the held-out half), not the single F1-maximizing
+    point on the full set, specifically to avoid selecting on the data
+    then reporting performance on it. Held-out means across those trials:
+    F1 0.200 -> 0.336, with the re-tuned settings beating the shipped ones
+    in 93.5% of trials. The median selected count threshold was 8 (IQR
+    6-10) against the shipped 20.
+
+    REMAINING LIMITATION: precision above ~50% is unreachable at any
+    threshold combination in the grid, so this detector is still noisy -
+    roughly half its positives are false. `stripe_present=True` is a
+    moderate-confidence signal, not a confident one. Recall of 50% also
+    still means half of real stripe patterns are missed, so
+    `stripe_present=False` remains weak evidence of absence, just far less
+    weak than the ~14%-recall version it replaces.
 
     Attributes:
         min_eccentricity_for_stripe: A region's eccentricity must be at
-            least this high to count as elongated/stripe-like. 0.97
-            (up from 0.9) - the calibration grid found higher eccentricity
-            cutoffs consistently scored better, meaning many real
-            false-positive regions (fin rays, shading edges) were
-            elongated but not *extremely* elongated.
+            least this high to count as elongated/stripe-like. 0.98
+            (v2.2.1: 0.97, originally 0.9) - the real-mask grid search
+            selected 0.98 most often across split-half trials, continuing
+            the trend that stricter eccentricity helps: many false-positive
+            regions (fin rays, shading edges) are elongated but not
+            *extremely* elongated.
         min_elongated_region_count: At least this many elongated regions
             must be found for the image to be called "striped" by region
-            shape alone. 20 (up from 2) - the single biggest change this
-            round. Real photos routinely have a handful of small,
-            genuinely elongated-and-narrow regions from fin rays, JPEG
-            noise, and mask-boundary artifacts even on solid-coloured
-            fish; only genuinely multi-stripe patterns (confirmed via the
-            v2.0.5 diagnostic: Acanthurus lineatus showed ~30 real stripe
-            regions) accumulate this many.
+            shape alone. 8 (v2.2.1: 20, originally 2) - the single biggest
+            change this round, and the main reason recall improves. The
+            v2.2.1 value of 20 was tuned on approximated masks, which
+            produced far more spurious elongated regions than real SAM2
+            masks do; against real masks that bar is far too high and
+            rejects most genuine stripe patterns. Real photos still carry
+            some elongated-and-narrow regions from fin rays and mask-
+            boundary artifacts, which is why the threshold is 8 rather
+            than the 2 it started at.
         max_stripe_width_fraction: A region's minor-axis width must be at
             most this fraction of sqrt(total masked pixels) - a proxy for
             the fish's characteristic size - to count as stripe-like.
-            0.12 (up from 0.08); the calibration grid found this looser
-            width allowance worked better paired with the much stricter
-            eccentricity/count thresholds above. Known residual confound
+            0.10 (v2.2.1: 0.12, originally 0.08). This was the least
+            stable parameter in the split-half trials - values from 0.06
+            to 0.15 all appeared among the top selections - so 0.10 is a
+            middle-of-range choice rather than a sharply-identified
+            optimum, and the result is not sensitive to it. Known residual confound
             this doesn't fully fix: fin rays are genuinely thin and
             elongated, so some can still pass even a strict check - the
             higher min_elongated_region_count above is what mainly
@@ -219,10 +238,14 @@ class StripeConfig:
             cycles=3: striped mean 0.086 vs. non-striped mean 0.084) -
             worse than the v2.1.1 fix intended, the whole periodicity
             approach carries no real signal on real photos, at least
-            under this calibration's approximate masks. Not deleted,
-            since real SAM2 masks (precise mask boundaries, not a crude
-            flood-fill approximation) might behave differently - this is
-            flagged as needing re-validation, not concluded dead.
+            under this calibration's approximate masks. That re-validation
+            has now been done against real SAM2 masks and the conclusion
+            holds: correlation between the periodicity signal and the hand
+            labels is r=+0.020 (cycles=2), -0.092 (cycles=3) and -0.066
+            (cycles=4) - indistinguishable from noise, and two of the three
+            point the wrong way. The signal is dead on real masks too, not
+            merely unvalidated. Kept disabled rather than deleted so the
+            mechanism and its negative result stay legible.
         min_periodicity_cycles: Minimum number of repeats a frequency must
             represent across the profile to be eligible as the "peak" used
             for min_periodicity_strength. Kept at 3 (the v2.1.1 value) -
@@ -231,9 +254,9 @@ class StripeConfig:
             real masks.
     """
 
-    min_eccentricity_for_stripe: float = 0.97
-    min_elongated_region_count: int = 20
-    max_stripe_width_fraction: float = 0.12
+    min_eccentricity_for_stripe: float = 0.98
+    min_elongated_region_count: int = 8
+    max_stripe_width_fraction: float = 0.10
     min_periodicity_strength: float = 0.9
     min_periodicity_cycles: int = 3
 
