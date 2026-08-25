@@ -7,6 +7,10 @@ dependencies = [
     "Pillow>=10.0",
     "numpy>=1.26",
     "scipy>=1.11",
+    # Bio.Phylo (distance_matrices/phylogeny.py): Newick tree parsing,
+    # pruning, and patristic distance - CPU-only, no GPU extra needed, so
+    # it's a base dependency like the rest of Phase 3.
+    "biopython>=1.81",
 ]
 
 [project.optional-dependencies]
