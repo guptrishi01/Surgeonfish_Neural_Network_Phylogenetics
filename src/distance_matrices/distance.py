@@ -1,7 +1,8 @@
 """Pairwise species x species distance matrices from per-species feature vectors.
 
-Euclidean distance on z-score-standardized features - see the package
-docstring for why this metric was chosen over Bray-Curtis.
+Euclidean distance on rank-standardized features - see the package
+docstring for why Euclidean was chosen over Bray-Curtis, and
+``standardize()``'s docstring for why ranks, not raw z-scores.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.spatial.distance import pdist, squareform
+from scipy.stats import rankdata
 
 from distance_matrices.aggregation import SpeciesAggregate
 
@@ -55,10 +57,30 @@ def build_feature_matrix(
 
 
 def standardize(matrix: np.ndarray) -> np.ndarray:
-    """Z-score standardizes each column (feature) independently.
+    """Rank-transforms each column (feature), then z-score standardizes the ranks.
 
-    A zero-variance column (e.g. every species scored identically on some
-    feature) is left at zero after centering rather than divided by zero.
+    Ranking before standardizing was found necessary against the real
+    49-species Phase 3 run, not chosen speculatively: Acanthurus lineatus's
+    mean_elongated_region_count (33.3) is such an extreme outlier relative
+    to the rest of the study set that raw z-scoring compressed every other
+    species' value toward zero - including genuinely-striped Zebrasoma
+    veliferum's real, meaningfully-elevated count (12.6, ranking 5th of
+    49 species). Under raw z-scoring, the resulting stripe-dimension
+    distance put veliferum closer to solid-coloured Zebrasoma species
+    (Euclidean distance ~1.6-2.1) than to lineatus (~6.4) - the opposite
+    of what comparing the actual photos shows. Rank-transforming first
+    neutralizes a single outlier's influence on everyone else's
+    standardized value: re-checked against the same real data, this drops
+    the lineatus-veliferum distance to ~0.9 while increasing veliferum's
+    distance from the solid species to ~3.0-3.7, the expected direction -
+    confirmed by cross-checking mean_elongated_region_count's full
+    ranking, where veliferum (5th) sits directly behind two other
+    genuinely-patterned species (Zebrasoma desjardinii, Ctenochaetus
+    hawaiiensis), not a fluke of one pair.
+
+    A tied column (every species ranked identically - only possible if
+    every species scored exactly the same on that feature) is left at
+    zero after centering rather than divided by a zero standard deviation.
 
     Args:
         matrix: (n_species, n_features) array.
@@ -66,10 +88,11 @@ def standardize(matrix: np.ndarray) -> np.ndarray:
     Returns:
         Standardized array, same shape.
     """
-    mean = matrix.mean(axis=0)
-    std = matrix.std(axis=0)
+    ranks = np.column_stack([rankdata(matrix[:, i]) for i in range(matrix.shape[1])])
+    mean = ranks.mean(axis=0)
+    std = ranks.std(axis=0)
     safe_std = np.where(std > 1e-12, std, 1.0)
-    return (matrix - mean) / safe_std
+    return (ranks - mean) / safe_std
 
 
 def pairwise_distance_matrix(matrix: np.ndarray) -> np.ndarray:

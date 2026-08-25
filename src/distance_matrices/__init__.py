@@ -49,13 +49,20 @@ output (the per-species feature matrices) is what Phase 4 consumes.
   converts to a scale-invariant fraction before aggregating, rather than
   shipping a resolution-confounded feature into a distance matrix.
 
-**Distance metric.** Euclidean distance on z-score-standardized per-species
-feature vectors (`distance.py`) - the standard default for a feature set
-mixing proportions, counts, and ratio-scale magnitudes with no natural
-compositional (sum-to-one) structure that would motivate Bray-Curtis
-instead. Kmult's own admissibility requirements (log-ratio transforms for
-compositional features, condition-number checks) are a Phase 4 concern for
-the raw per-species feature matrices, not this phase's pairwise distances.
+**Distance metric.** Euclidean distance on rank-standardized per-species
+feature vectors (`distance.py`) - Euclidean as the standard default for a
+feature set mixing proportions, counts, and ratio-scale magnitudes with no
+natural compositional (sum-to-one) structure that would motivate
+Bray-Curtis instead; ranked (not raw z-scored) after the real 49-species
+run showed why it matters, not speculatively - a single extreme outlier
+species (Acanthurus lineatus's stripe-region count) compressed every other
+species' raw z-score toward zero, distorting the stripe-dimension distance
+matrix so a second genuinely-striped species (Zebrasoma veliferum) landed
+closer to solid-coloured species than to A. lineatus. See
+`standardize()`'s own docstring for the full before/after numbers. Kmult's
+own admissibility requirements (log-ratio transforms for compositional
+features, condition-number checks) are a Phase 4 concern for the raw
+per-species feature matrices, not this phase's pairwise distances.
 
 **Phylogeny.** `phylogeny.py` loads and prunes the same genetic-data-only
 tree Phase 4 will use (`data/phylogeny/actinopt_12k_treePL.tre`), with the

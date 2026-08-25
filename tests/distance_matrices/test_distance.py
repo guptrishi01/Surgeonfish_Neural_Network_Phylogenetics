@@ -64,6 +64,29 @@ def test_standardize_handles_zero_variance_column_without_dividing_by_zero():
     assert np.allclose(result[:, 0], 0.0)
 
 
+def test_standardize_rank_transform_prevents_one_outlier_from_compressing_the_rest():
+    # The actual bug found against the real 49-species Phase 3 run: one
+    # extreme outlier (Acanthurus lineatus's mean_elongated_region_count,
+    # 33.3 against a bulk of low values around 2.5-3.3) compressed every
+    # other species' raw z-score toward zero, so a genuinely-elevated
+    # moderate species (Zebrasoma veliferum, 12.6) ended up standing
+    # closer to the low bulk than to the outlier - the wrong relative
+    # position, since 12.6 is real signal, not noise. Shape mirrors the
+    # real numbers: one extreme high value, eight low values, one
+    # moderately-elevated value that should land nearer the outlier than
+    # the bulk once ranked, not the reverse.
+    outlier = 33.0
+    low_bulk = [3.0] * 8
+    moderate = 12.0
+    matrix = np.array([[v] for v in ([outlier] + low_bulk + [moderate])])
+
+    standardized = standardize(matrix)
+    distances = pairwise_distance_matrix(standardized)
+    outlier_idx, moderate_idx, low_idx = 0, 9, 1
+
+    assert distances[moderate_idx, outlier_idx] < distances[moderate_idx, low_idx]
+
+
 def test_pairwise_distance_matrix_is_symmetric_with_zero_diagonal():
     matrix = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
 
