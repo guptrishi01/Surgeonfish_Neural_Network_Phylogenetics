@@ -48,6 +48,16 @@ class ImageExtractionState:
 
     @property
     def is_terminal(self) -> bool:
+        """Reports whether this image needs no further processing.
+
+        Terminal means a final decision has been reached (accepted or
+        excluded). A flagged image is deliberately *not* terminal — it is
+        awaiting a human decision, and a later run can revisit it.
+
+        Returns:
+            True if the image's status is final, False if it still needs
+            processing or review.
+        """
         return self.status in _TERMINAL_STATUSES
 
 

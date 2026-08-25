@@ -79,6 +79,13 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Entry point for ``python -m dataset_builder.cli``.
+
+    Dispatches to whichever mode the flags select — renumbering, applying
+    review feedback, or a collection run. Network collection is gated behind
+    ``--scrape-web``, so a bare invocation cannot start hitting GBIF by
+    accident.
+    """
     args = _parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),

@@ -52,6 +52,13 @@ def _parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    """Entry point for ``python -m fish_extractor.cli``.
+
+    Dispatches to whichever mode the flags select — applying review feedback,
+    generating the review page, or a detection/segmentation run. The GPU
+    models are gated behind ``--run``, so a bare invocation stays cheap and
+    cannot start downloading checkpoints.
+    """
     args = _parse_args()
     logging.basicConfig(
         level=getattr(logging, args.log_level),

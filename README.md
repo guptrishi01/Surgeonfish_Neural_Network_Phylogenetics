@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.1.0** — all planned phases (0–5) complete and audited. See
+**Version 6.1.1** — all planned phases (0–5) complete and audited. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
 pattern-genetics literature review.
@@ -292,6 +292,24 @@ pipeline.
 - **The synonym table is NCBI-derived**, not a fish taxonomic authority. It
   gates the one match (*Zebrasoma veliferum*) that makes coverage 50 rather
   than 49.
+
+---
+
+## Open follow-ups
+
+Distinct from the limitations above: those bound what the result means, these
+are actionable and unfinished.
+
+| # | item | why it matters |
+| --- | --- | --- |
+| 1 | **Register a GBIF derived-dataset DOI** | GBIF's own guidance requires this for search-API pulls. **Blocks publication** — the only hard blocker here. |
+| 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
+| 3 | **Numerical-equivalence check for the *patternize* port** | The colour clustering is a Python reimplementation never checked against the R package — and colour is the dimension carrying the headline result. |
+| 4 | **Cross-check the synonym table** against FishBase or Eschmeyer's Catalog of Fishes | One species' inclusion currently rests on an NCBI-derived table that isn't a fish taxonomic authority. |
+| 5 | **Consider dropping the redundant thresholded proportions** | `prop_solid`/`prop_striped`/`prop_spotted` duplicate their own continuous measures (\|r\| = 0.80–0.95). Re-running without them would show whether the result depends on that redundancy. |
+
+Item 3 is worth flagging as the largest unquantified risk in the pipeline: it
+sits directly upstream of the only significant finding.
 
 ---
 

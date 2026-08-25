@@ -1,16 +1,22 @@
 # CLAUDE.md
 
-Project-specific context for the Surgeonfish Visual Phenomics and Phylogenetic Inference project. See [README.md](README.md) for the research question, species list, and pipeline overview.
+Project-specific context for the Surgeonfish Visual Phenomics and Phylogenetic Inference project.
+
+**Document map** (all planned phases are complete as of v6.1.0 — see the Version Control section for what a further change would be versioned as):
+- [README.md](README.md) — research question, results, pipeline, how to run it, limitations.
+- [METHODS.md](METHODS.md) — statistical design and preregistration (why Kmult is primary, the admissibility transforms, integrity checks).
+- [CHANGELOG.md](CHANGELOG.md) — full version history. **The changelog lives here, not in README.md.**
+- [BACKGROUND.md](BACKGROUND.md) — pattern-genetics literature review.
 
 ## Version Control
 
 Before each implementation/commit, ask whether it's a **major**, **minor**, or **patch** change:
 
-- **Major** — completion of a full rebuild phase (Phase 0 data collection, Phase 1 fish identification & extraction, Phase 2 pattern extraction, Phase 3 distance matrices, Phase 4 phylogenetic comparison, etc. — see README.md's Planned Approach for the current phase list).
+- **Major** — completion of a full rebuild phase. All planned phases are now done (0 data collection → 1 fish extraction → 2 pattern extraction → 3 distance matrices → 4 phylogenetic comparison → 5 documentation), so a further major bump would mean a genuinely new phase, not more work on an existing one. Phase 6 (genomics) was scoped and deliberately declined on power grounds — see README.md's Status section before reviving it.
 - **Minor** — a fix or discrete step within a phase (e.g. adding the review-page loop, fixing the numbering bug, adding retry logic).
 - **Patch** — a bug fix that doesn't add a step, just corrects one.
 
-Version format is `major.minor.patch`. Phase 0's completion is `1.0.0`; each subsequent phase's completion bumps the major version and resets minor/patch to zero. Record the current version and a brief changelog entry at the top of README.md whenever it changes — the implementation isn't done until that's recorded there.
+Version format is `major.minor.patch`. Phase 0's completion is `1.0.0`; each subsequent phase's completion bumps the major version and resets minor/patch to zero. Record the current version in README.md's header **and** a changelog entry at the top of [CHANGELOG.md](CHANGELOG.md) whenever it changes — the implementation isn't done until that's recorded.
 
 ## Data capture
 
