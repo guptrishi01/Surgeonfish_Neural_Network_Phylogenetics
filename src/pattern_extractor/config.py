@@ -44,12 +44,35 @@ class ColorConfig:
     """Thresholds for turning cluster fractions into coloring-dimension features.
 
     Attributes:
-        solid_dominant_fraction_threshold: If the largest non-background
-            cluster's pixel fraction is at least this high, the fish is
-            classified as solid-colored rather than multi-colored.
+        max_hue_dispersion_for_solid: An image is classified solid-coloured
+            if the mean distance of every masked-in pixel's hue/saturation
+            vector (see color_space.rgb_to_hue_sat_vector) from their
+            collective mean is at or below this value. Replaces a prior
+            "does one of k forced-partition k-means clusters cover >=85% of
+            the body" check (`solid_dominant_fraction_threshold`), which
+            the manual validation split (v2.2.0) showed was badly broken:
+            only 3% of a 155-image hand-labeled sample was classified
+            solid, even though 60% genuinely looked solid-coloured.
+            Root cause, confirmed by testing directly against real photos:
+            k-means asked for k=4 clusters will partition a genuinely
+            unimodal colour distribution into k similarly-sized pieces
+            regardless of how tightly clustered the real data is - there's
+            no mechanism for it to report "these are all basically one
+            colour." This dispersion measure sidesteps that by not forcing
+            a k-way partition at all - it's a direct spread statistic over
+            every pixel. 0.20 was empirically chosen, not guessed: swept
+            across the same 155-image hand-labeled sample (masks
+            approximated via a corner flood-fill, not real SAM2 masks, so
+            production accuracy should be checked rather than assumed
+            identical), it gave the best accuracy found (71%, up from the
+            old check's 41% - worse than a trivial majority-class baseline)
+            at precision 72% / recall 84%. Real remaining disagreement is
+            expected, not a bug: some fish genuinely have one dominant
+            colour plus a small accent patch, a case reasonable people
+            would label differently.
     """
 
-    solid_dominant_fraction_threshold: float = 0.85
+    max_hue_dispersion_for_solid: float = 0.20
 
 
 @dataclass
@@ -101,61 +124,70 @@ class SpotConfig:
 class StripeConfig:
     """Thresholds for classifying regions/texture as stripe-like.
 
+    All four thresholds below were empirically calibrated (v2.2.1) against
+    the 155-image manually-labeled validation sample, via a grid search
+    maximizing F1 score - replacing the "reasoned interim value" defaults
+    used through v2.1.1, none of which had been checked against real
+    ground truth yet. Important caveat carried by all of them: calibration
+    used masks approximated by a corner flood-fill (the real images'
+    grey background is contiguous with the border in fish_extractor's
+    output), not real SAM2 masks - production accuracy on the real
+    pipeline should be re-checked via the same notebook validation loop,
+    not assumed identical.
+
     Attributes:
         min_eccentricity_for_stripe: A region's eccentricity must be at
-            least this high to count as elongated/stripe-like.
+            least this high to count as elongated/stripe-like. 0.97
+            (up from 0.9) - the calibration grid found higher eccentricity
+            cutoffs consistently scored better, meaning many real
+            false-positive regions (fin rays, shading edges) were
+            elongated but not *extremely* elongated.
         min_elongated_region_count: At least this many elongated regions
             must be found for the image to be called "striped" by region
-            shape alone.
+            shape alone. 20 (up from 2) - the single biggest change this
+            round. Real photos routinely have a handful of small,
+            genuinely elongated-and-narrow regions from fin rays, JPEG
+            noise, and mask-boundary artifacts even on solid-coloured
+            fish; only genuinely multi-stripe patterns (confirmed via the
+            v2.0.5 diagnostic: Acanthurus lineatus showed ~30 real stripe
+            regions) accumulate this many.
         max_stripe_width_fraction: A region's minor-axis width must be at
             most this fraction of sqrt(total masked pixels) - a proxy for
             the fish's characteristic size - to count as stripe-like.
-            Added after a diagnostic visualization against real Phase 1/2
-            output showed eccentricity alone couldn't tell a genuine thin
-            stripe band apart from one wide, smooth lighting/shading zone
-            spanning half a fish's body: both score high eccentricity
-            since the fish silhouette itself is elongated, so any region
-            covering roughly half of it inherits that elongation without
-            being a stripe. 0.08 is a reasoned interim value (a real
-            stripe band should be a small fraction of the fish's size,
-            not comparable to half the body) - not yet validated against
-            manually-labeled ground truth, same caveat as
-            RegionConfig.min_region_area_fraction. Known residual
-            confound this doesn't fix: fin rays are genuinely thin and
-            elongated, so they can still pass this check even though
-            they're fin anatomy, not a body colour pattern - the planned
-            60/20/20 validation split (see Planned Approach step 2) is
-            needed to catch that class of false positive.
+            0.12 (up from 0.08); the calibration grid found this looser
+            width allowance worked better paired with the much stricter
+            eccentricity/count thresholds above. Known residual confound
+            this doesn't fully fix: fin rays are genuinely thin and
+            elongated, so some can still pass even a strict check - the
+            higher min_elongated_region_count above is what mainly
+            absorbs that now, not this threshold alone.
         min_periodicity_strength: Minimum normalized FFT peak strength
             (of the masked region's intensity profile along its principal
             axis) to call the image "striped" by periodicity, independent
-            of the region-count signal above.
+            of the region-count signal above. Effectively disabled (0.9,
+            unreachable in practice - observed real values ranged
+            ~0.04-0.49) after calibration showed essentially zero
+            separation between genuinely striped and non-striped real
+            images at every min_periodicity_cycles value tested (e.g. at
+            cycles=3: striped mean 0.086 vs. non-striped mean 0.084) -
+            worse than the v2.1.1 fix intended, the whole periodicity
+            approach carries no real signal on real photos, at least
+            under this calibration's approximate masks. Not deleted,
+            since real SAM2 masks (precise mask boundaries, not a crude
+            flood-fill approximation) might behave differently - this is
+            flagged as needing re-validation, not concluded dead.
         min_periodicity_cycles: Minimum number of repeats a frequency must
             represent across the profile to be eligible as the "peak" used
-            for min_periodicity_strength. Added after a real diagnostic
-            (Phase 2 notebook step 6b-ii) showed the periodicity signal was
-            inverted: genuinely solid-coloured Zebrasoma species (which
-            have a real dorsal-to-ventral lighting gradient) scored
-            *higher* periodicity than genuinely striped Acanthurus
-            lineatus. Cause: a single smooth colour gradient (one lobe, no
-            repetition) concentrates almost all of its non-DC spectral
-            energy in the lowest available frequency exactly like genuine
-            low-count periodicity does - confirmed numerically with a
-            synthetic single-lobe gradient scoring 0.673 pre-fix vs. 0.269
-            for a genuine 10-stripe pattern. Restricting the eligible peak
-            to frequencies representing at least this many repeats across
-            the profile excludes that single-lobe case while leaving a
-            real repeating pattern's peak untouched. 3 is a reasoned
-            interim value (a real stripe pattern should repeat more than
-            once or twice to be called "striped" at all) - not yet
-            validated against manually-labeled ground truth, same caveat
-            as this config's other thresholds.
+            for min_periodicity_strength. Kept at 3 (the v2.1.1 value) -
+            moot while min_periodicity_strength is effectively disabled,
+            but left in place for when periodicity is re-evaluated against
+            real masks.
     """
 
-    min_eccentricity_for_stripe: float = 0.9
-    min_elongated_region_count: int = 2
-    max_stripe_width_fraction: float = 0.08
-    min_periodicity_strength: float = 0.3
+    min_eccentricity_for_stripe: float = 0.97
+    min_elongated_region_count: int = 20
+    max_stripe_width_fraction: float = 0.12
+    min_periodicity_strength: float = 0.9
     min_periodicity_cycles: int = 3
 
 

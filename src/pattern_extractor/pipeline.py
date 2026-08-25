@@ -30,7 +30,8 @@ from pattern_extractor.stripe import extract_stripe_features
 logger = logging.getLogger(__name__)
 
 _FIELDNAMES = [
-    "image_key", "is_reference", "dominant_fraction", "is_solid", "n_significant_colors",
+    "image_key", "is_reference", "dominant_fraction", "hue_dispersion", "is_solid",
+    "n_significant_colors",
     "spot_count", "mean_spot_area", "spot_present",
     "elongated_region_count", "periodicity_strength", "stripe_present",
 ]
@@ -159,7 +160,7 @@ class PatternExtractorPipeline:
         """
         image, mask = loaded
         cluster_result = assign_clusters(image, mask, reference_centers, self._config.clustering)
-        color = extract_color_features(cluster_result, self._config.color)
+        color = extract_color_features(image, mask, cluster_result, self._config.color)
         spot = extract_spot_features(cluster_result, self._config.region, self._config.spot)
         stripe = extract_stripe_features(
             image, mask, cluster_result, self._config.region, self._config.stripe
@@ -172,6 +173,7 @@ class PatternExtractorPipeline:
             "image_key": image_key,
             "is_reference": is_reference,
             "dominant_fraction": color.dominant_fraction,
+            "hue_dispersion": color.hue_dispersion,
             "is_solid": color.is_solid,
             "n_significant_colors": color.n_significant_colors,
             "spot_count": spot.spot_count,

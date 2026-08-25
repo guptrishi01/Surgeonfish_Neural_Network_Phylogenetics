@@ -74,7 +74,16 @@ def test_too_few_masked_pixels_returns_zero_periodicity():
 
 
 def test_striped_image_is_detected_as_stripe_present():
-    image, mask = _striped_image()
+    # v2.2.1 calibrated min_elongated_region_count against real photos to
+    # 20 (up from 2) - real solid-coloured fish routinely have a handful of
+    # spurious elongated regions (fin rays, noise), so the default
+    # _striped_image()'s 10 bands (5 per colour) no longer clears the bar.
+    # A genuinely multi-stripe pattern should have many more repeats than
+    # that anyway (the real Acanthurus lineatus diagnostic that motivated
+    # this calibration showed ~30 real stripe regions) - use a finer band
+    # width so this test still represents "many real stripes," not a
+    # borderline case tuned just to pass.
+    image, mask = _striped_image(size=(100, 100), band_width=2)
     cluster_result = _cluster_result_for(image, mask, k=2)
 
     features = extract_stripe_features(
