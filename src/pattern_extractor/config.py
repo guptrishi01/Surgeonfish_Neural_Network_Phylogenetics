@@ -130,12 +130,33 @@ class StripeConfig:
             (of the masked region's intensity profile along its principal
             axis) to call the image "striped" by periodicity, independent
             of the region-count signal above.
+        min_periodicity_cycles: Minimum number of repeats a frequency must
+            represent across the profile to be eligible as the "peak" used
+            for min_periodicity_strength. Added after a real diagnostic
+            (Phase 2 notebook step 6b-ii) showed the periodicity signal was
+            inverted: genuinely solid-coloured Zebrasoma species (which
+            have a real dorsal-to-ventral lighting gradient) scored
+            *higher* periodicity than genuinely striped Acanthurus
+            lineatus. Cause: a single smooth colour gradient (one lobe, no
+            repetition) concentrates almost all of its non-DC spectral
+            energy in the lowest available frequency exactly like genuine
+            low-count periodicity does - confirmed numerically with a
+            synthetic single-lobe gradient scoring 0.673 pre-fix vs. 0.269
+            for a genuine 10-stripe pattern. Restricting the eligible peak
+            to frequencies representing at least this many repeats across
+            the profile excludes that single-lobe case while leaving a
+            real repeating pattern's peak untouched. 3 is a reasoned
+            interim value (a real stripe pattern should repeat more than
+            once or twice to be called "striped" at all) - not yet
+            validated against manually-labeled ground truth, same caveat
+            as this config's other thresholds.
     """
 
     min_eccentricity_for_stripe: float = 0.9
     min_elongated_region_count: int = 2
     max_stripe_width_fraction: float = 0.08
     min_periodicity_strength: float = 0.3
+    min_periodicity_cycles: int = 3
 
 
 @dataclass

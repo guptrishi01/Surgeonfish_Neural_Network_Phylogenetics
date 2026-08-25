@@ -44,6 +44,27 @@ def test_solid_image_has_near_zero_periodicity_strength():
     assert strength == 0.0
 
 
+def test_smooth_gradient_does_not_score_high_periodicity():
+    # A single smooth colour gradient (no repetition) - e.g. the real
+    # dorsal-to-ventral lighting gradient on a genuinely solid-coloured
+    # fish - concentrates almost all of its non-DC spectral energy in the
+    # lowest available frequency, exactly like genuine low-count
+    # periodicity does. Confirmed against a real diagnostic (Phase 2
+    # notebook step 6b-ii): solid-coloured Zebrasoma species scored
+    # *higher* on this metric than genuinely striped Acanthurus lineatus
+    # before this fix, and a synthetic single-lobe gradient like this one
+    # scored 0.673 pre-fix vs. 0.269 for a genuine 10-stripe pattern.
+    height, width = 120, 50
+    row_values = (200 * np.sin(np.pi * np.arange(height) / (height - 1))).astype(np.uint8)
+    image = np.zeros((height, width, 3), dtype=np.uint8)
+    image[:, :, 0] = row_values[:, None]
+    mask = np.ones((height, width), dtype=bool)
+
+    strength = _periodicity_strength(image, mask)
+
+    assert strength < StripeConfig().min_periodicity_strength
+
+
 def test_too_few_masked_pixels_returns_zero_periodicity():
     mask = np.zeros((10, 10), dtype=bool)
     mask[0, 0] = True
