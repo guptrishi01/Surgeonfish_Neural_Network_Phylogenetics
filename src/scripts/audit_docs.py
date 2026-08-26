@@ -124,6 +124,15 @@ lint = subprocess.run([sys.executable, "-m", "ruff", "check", "src", "tests"],
                       cwd=ROOT, capture_output=True, text=True)
 check("ruff clean", lint.returncode == 0, lint.stdout.strip()[:100])
 
+# Test counts quoted in prose drift whenever a test is added or un-skipped -
+# which is exactly what happened when the comparison test stopped skipping.
+actual = re.search(r"(\d+) passed", tests)
+if actual:
+    n = actual.group(1)
+    quoted = set(re.findall(r"(\d{3}) tests", readme))
+    check(f"README test counts match the suite ({n})",
+          not quoted or quoted == {n}, f"README says {sorted(quoted)}, suite has {n}")
+
 # Every tracked output referenced by a doc must exist, and vice versa: every
 # tracked result dir should be explained somewhere.
 for d in ("outputs/phase4", "outputs/phase4_min5", "outputs/phase4_noprops",
