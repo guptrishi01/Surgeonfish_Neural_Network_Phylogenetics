@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.5.0** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.5.1** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -354,7 +354,7 @@ are actionable and unfinished.
 | 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
 | 3 | ~~Validate the *patternize* port~~ — **done** | Worst disagreement **0.0037** across 12 cluster fractions on 3 species, against a 0.05 threshold set before running. The port is validated. |
 | 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
-| 5 | ~~Test dropping the redundant thresholded proportions~~ — **done** | Every verdict is unchanged without them; the result does not depend on the redundancy. |
+| 5 | **Test dropping the redundant thresholded proportions** — done for the secondary test only | Every *Mantel* verdict is unchanged without them (colour BH *p* 0.022→0.034, stripe null, spot significant), so the result does not appear to depend on the redundancy. The **Kmult** version was never run: its inputs are prepared in [`outputs/phase4_noprops/`](outputs/phase4_noprops/) and need one Colab cell. |
 
 Item 3 remains the largest unquantified risk in the pipeline: it sits directly upstream
 of the only significant finding.
