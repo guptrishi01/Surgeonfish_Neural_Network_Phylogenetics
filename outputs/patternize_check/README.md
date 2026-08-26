@@ -12,5 +12,5 @@ result uninterpretable (see CHANGELOG v6.3.0).
 - `python_reference.csv` - per-image pixel counts and fractions, including
   how many pixels were dropped to make the count rectangular.
 
-Regenerate with `scratchpad/make_patternize_inputs.py`; compare against R via
+Regenerate with `src/scripts/make_patternize_inputs.py`; compare against R via
 Part B of `notebooks/Followups.ipynb`.

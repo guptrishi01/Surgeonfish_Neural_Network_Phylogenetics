@@ -223,7 +223,7 @@ finding that only appeared once the real run happened.)
 
 ## 4. Phylogenetic signal testing
 
-**Package:** `src/phylo_comparison/` · **Script:** `r/phase4_kmult.R` ·
+**Package:** `src/phylo_comparison/` · **Script:** `src/r/phase4_kmult.R` ·
 **Notebook:** `notebooks/Phase4_Phylogenetic_Comparison.ipynb`
 
 ### 4.1 Why Kmult is primary, and Mantel only secondary

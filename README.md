@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.6.0** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.7.0** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -36,6 +36,9 @@ developmental mechanism.
 
 ## Results
 
+![Pipeline](figures/fig1_pipeline.png)
+
+
 Across **49 species** with real genetic-data phylogenetic placement
 ([`reports/species_features.csv`](reports/species_features.csv)):
 
@@ -50,6 +53,8 @@ Secondary: label-permutation Mantel — [`outputs/phase4/mantel_results.csv`](ou
 Benjamini–Hochberg corrected across the three dimensions.*
 
 **Colour pattern shows weak but robust phylogenetic signal. Stripe and spot do not.**
+
+![Results](figures/fig2_results.png)
 
 > **Re-verified after the stripe recalibration.** The stripe detector was recalibrated
 > against real SAM 2 masks in v6.2.0 (recall 14.3% → 50.0%), changing the stripe features
@@ -137,7 +142,7 @@ reports/pattern_features.csv        853 rows, one per image
 reports/species_features.csv        49 species × 10 features
 outputs/*_distance_matrix.csv       3 pattern + 1 patristic (49×49)
         │
-        │  Phase 4 · src/phylo_comparison/ + r/phase4_kmult.R   [R · geomorph]
+        │  Phase 4 · src/phylo_comparison/ + src/r/phase4_kmult.R   [R · geomorph]
         │  Kmult (primary) + Mantel (secondary) + BH correction
         ▼
 outputs/phase4/kmult_results.csv · mantel_results.csv · sensitivity_comparison.csv
@@ -220,7 +225,7 @@ ephemeral local disk — that's what keeps resumable per-image state, extracted
 images, and review pages valid across a disconnect or restart.
 
 Phase 4 installs `geomorph` from source on first run (5–15 min) and executes
-`r/phase4_kmult.R` via `rpy2`'s `%%R` magic, so one Python-kernel session
+`src/r/phase4_kmult.R` via `rpy2`'s `%%R` magic, so one Python-kernel session
 handles both halves without a runtime switch.
 
 ---
@@ -292,8 +297,9 @@ hand-collected, not scraped from web search results.
 │   ├── fish_extractor/        Phase 1 · Grounded SAM 2 detection + segmentation
 │   ├── pattern_extractor/     Phase 2 · colour/stripe/spot feature extraction
 │   ├── distance_matrices/     Phase 3 · per-species aggregation + distances
-│   └── phylo_comparison/      Phase 4 · Kmult feature prep + tree export
-├── r/phase4_kmult.R           Phase 4 · physignal.z, compare.physignal.z, Mantel
+│   ├── phylo_comparison/      Phase 4 · Kmult feature prep + tree export
+│   ├── r/phase4_kmult.R       Phase 4 · physignal.z, compare.physignal.z, Mantel
+│   └── scripts/               figure generation + check-input builders
 ├── notebooks/                 Colab notebooks, one per phase
 ├── tests/                     183 tests, GPU calls mocked
 ├── data/
@@ -303,6 +309,7 @@ hand-collected, not scraped from web search results.
 │   └── genome_assemblies/     NCBI availability survey (metadata only)
 ├── reports/                   per-image features, audit logs, hand labels
 ├── outputs/                   distance matrices + Phase 4 results
+├── figures/                   generated figures (src/scripts/make_figures.py)
 ├── METHODS.md                 statistical design and preregistration
 ├── CHANGELOG.md               full version history
 └── BACKGROUND.md              pattern-genetics literature review
