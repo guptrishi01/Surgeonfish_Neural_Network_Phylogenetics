@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.7.3** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.7.4** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -89,13 +89,14 @@ spot was already being reported as non-significant, so no headline conclusion de
 it. Had the significant secondary result been reported instead, this check would have
 shown that claim to be an artifact.
 
-Cross-dimension comparison also shifted with the better stripe measurement: colour still
-carries significantly more signal than stripe (*p*=0.040, was 0.014), but spot-vs-stripe
-is no longer significant (*p*=0.088, was 0.033).
+Cross-dimension comparison (`compare.physignal.z`) also shifted with the better stripe
+measurement: colour still carries significantly more signal than stripe (*p*=0.040, was
+0.014), but spot-vs-stripe is no longer significant (*p*=0.088, was 0.033).
 
-Cross-dimension comparison (`compare.physignal.z`) agrees: colour and spot each
-carry more signal than stripe (*p*=0.014, 0.033) but are indistinguishable from
-each other (*p*=0.714).
+**Both of those p-values come from `compare.physignal.z`'s console output, not from a
+tracked result file** — the one set of published numbers a clone cannot currently
+re-check, and the reason a superseded version of this paragraph survived here for five
+versions. Follow-up 6 below closes that.
 
 ### How to read these numbers
 
@@ -371,9 +372,11 @@ are actionable and unfinished.
 | 3 | ~~Validate the *patternize* port~~ — **done** | Worst disagreement **0.0037** across 12 cluster fractions on 3 species, against a 0.05 threshold set before running. The port is validated. |
 | 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
 | 5 | ~~Test dropping the redundant thresholded proportions~~ — **done, both tests** | Every verdict is stable under Kmult *and* Mantel ([`outputs/phase4_noprops/`](outputs/phase4_noprops/)). Colour in fact **strengthens** without them (BH *p* 0.027 → 0.009): the redundancy was mildly diluting the signal, not creating it. |
+| 6 | **Export `compare.physignal.z` to a tracked file — code ready, needs one R re-run** | Every other published number traces to a file under `reports/` or `outputs/`; the cross-dimension p-values traced only to console output, so nothing could check them and a stale paragraph quoting superseded values went unnoticed until v6.7.4. `src/r/phase4_kmult.R` now writes `outputs/phase4/comparison_results.csv` and `comparison_summary.txt`; run [`notebooks/Phase4_Comparison_Export.ipynb`](notebooks/Phase4_Comparison_Export.ipynb) on Colab to produce them. A test asserting README's quoted values appear in that file skips until it exists. |
 
-**Four of the five are closed by evidence; the fifth is deliberately skipped.** What
-remains is new research rather than unfinished work — see Status below.
+**Four of the six are closed by evidence, one is deliberately skipped, and one needs a
+single Colab run.** What remains beyond that is new research rather than unfinished
+work — see Status below.
 
 ### The patternize port is validated
 

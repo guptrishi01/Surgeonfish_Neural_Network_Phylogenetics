@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -56,6 +57,15 @@ pytestmark = pytest.mark.skipif(
 needs_kmult = pytest.mark.skipif(
     not (ROOT / "outputs/phase4/kmult_results.csv").exists(),
     reason="Kmult results pending regeneration in R (see notebooks/Followups.ipynb)",
+)
+
+# compare.physignal.z's result was console-only until v6.7.4, so this file does
+# not exist in checkouts predating the next Phase 4 run. Skipping until then is
+# the point: the alternative is asserting nothing at all about those numbers.
+needs_comparison = pytest.mark.skipif(
+    not (ROOT / "outputs/phase4/comparison_results.csv").exists(),
+    reason="cross-dimension comparison export pending an R re-run "
+           "(see notebooks/Phase4_Comparison_Export.ipynb)",
 )
 
 DIMENSIONS = ["color", "stripe", "spot"]
@@ -423,6 +433,33 @@ def test_sensitivity_run_leaves_every_primary_verdict_unchanged():
     # The one documented instability is spot's *secondary* result.
     spot = next(r for r in rows if r["dimension"] == "spot")
     assert spot["mantel_verdict_stable"].strip().upper() == "FALSE"
+
+
+@needs_comparison
+def test_readme_cross_dimension_p_values_come_from_the_comparison_output():
+    """The gap that let a superseded paragraph survive five versions.
+
+    README quoted `compare.physignal.z` p-values that existed only in R console
+    output. With no file to check against, a pre-recalibration paragraph could
+    sit directly beneath the corrected one - each stating different values for
+    the same two comparisons - and nothing could tell them apart.
+    """
+    values = {round(float(r["value"]), 3)
+              for r in _read_csv("outputs/phase4/comparison_results.csv")}
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    start = readme.index("Cross-dimension comparison")
+    section = readme[start:readme.index("### How to read these numbers", start)]
+
+    quoted = {round(float(v), 3) for v in re.findall(r"\*p\*=([0-9.]+)", section)}
+    # Values explicitly marked "was X" are labelled superseded on purpose.
+    superseded = {round(float(v), 3) for v in re.findall(r"was ([0-9.]+)", section)}
+
+    missing = sorted((quoted - superseded) - values)
+    assert not missing, (
+        f"README quotes cross-dimension p-value(s) {missing} absent from "
+        "outputs/phase4/comparison_results.csv"
+    )
 
 
 # --------------------------------------------------------------------------

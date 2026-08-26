@@ -123,6 +123,10 @@ def figure_pipeline() -> None:
 def figure_results() -> None:
     kmult = {r["dimension"]: r for r in read_csv("outputs/phase4/kmult_results.csv")}
     mantel = {r["dimension"]: r for r in read_csv("outputs/phase4/mantel_results.csv")}
+    # Counts and effect sizes are read, not typed - a caption that states a
+    # result has to come from the result file like everything else here.
+    n_species = len(read_csv("reports/species_features.csv"))
+    n_dropped = n_species - len(read_csv("reports/species_features_min5.csv"))
     dims = ["color", "stripe", "spot"]
     label = {"color": "Colour", "stripe": "Stripe", "spot": "Spot"}
 
@@ -153,16 +157,19 @@ def figure_results() -> None:
     # Spot clears alpha under the secondary test only. Flag it, or the green bar
     # reads as a positive result when the preregistered plan says otherwise.
     ax2.annotate("clears α here, but not under the\nprimary test — and it disappears\n"
-                 "when 2 sparse species are dropped",
+                 f"when {n_dropped} sparse species are dropped",
                  xy=(0.038, y[2] - 0.26), xytext=(0.13, y[2] - 0.55),
                  fontsize=7.5, color=WARM, va="center",
                  arrowprops=dict(arrowstyle="->", color=WARM, lw=0.9))
 
-    fig.suptitle("Only colour pattern shows phylogenetic signal  ·  49 Acanthuridae species",
+    fig.suptitle(f"Only colour pattern shows phylogenetic signal  ·  "
+                 f"{n_species} Acanthuridae species",
                  fontsize=12.5, fontweight="bold", x=0.008, ha="left", y=1.04)
     fig.text(0.008, -0.06,
              "Colour is significant under both tests and stays significant when the two "
-             "sparsest species are dropped. Effect sizes are small\n(K ≈ 0.006, r ≈ 0.13): "
+             "sparsest species are dropped. Effect sizes are small\n"
+             f"(K ≈ {float(kmult['color']['K']):.3f}, "
+             f"r ≈ {float(mantel['color']['observed_r']):.2f}): "
              "detectable, not strong. Null results are inconclusive rather than evidence "
              "of no association (Harmon & Glor 2010).",
              fontsize=8.5, color=MUTED, va="top")
@@ -197,7 +204,8 @@ def figure_matrices() -> None:
         ax.set_yticks([])
         fig.colorbar(im, ax=ax, fraction=0.046, pad=0.03).ax.tick_params(labelsize=7)
 
-    fig.suptitle("Pairwise distance matrices — 49 species, ordered by phylogeny",
+    fig.suptitle(f"Pairwise distance matrices — {len(species)} species, "
+                 f"ordered by phylogeny",
                  fontsize=12.5, fontweight="bold", x=0.008, ha="left", y=1.06)
     fig.text(0.008, -0.04,
              "Species are ordered identically in all four panels. If pattern tracked "
@@ -353,7 +361,7 @@ def figure_species_space() -> None:
     ax.set_xlabel(f"PC1 ({var[0]:.0%} of variance)", fontsize=9.5)
     ax.set_ylabel(f"PC2 ({var[1]:.0%} of variance)", fontsize=9.5)
     ax.legend(frameon=False, fontsize=9, loc="best")
-    ax.set_title("Pattern feature space — 49 species, coloured by genus",
+    ax.set_title(f"Pattern feature space — {len(rows)} species, coloured by genus",
                  fontsize=12.5, fontweight="bold", loc="left", pad=12)
     fig.text(0.008, -0.03,
              "Genera overlap substantially: closely related species are not obviously "

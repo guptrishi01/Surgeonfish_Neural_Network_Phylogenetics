@@ -131,6 +131,88 @@ mantel_r <- function(dist_a, dist_b) {
 }
 
 # ---------------------------------------------------------------------------
+# Persist compare.physignal.z's result.
+#
+# Field names on geomorph's return object are deliberately NOT hard-coded here.
+# This project has no local R runtime to verify return shapes against (see
+# CLAUDE.md's no-guessing rule) and has already shipped one bug from a guessed
+# geomorph field name (v4.1.1, `P.value`). So this walks whatever the object
+# actually contains and records the names it finds, rather than assuming names
+# like `pairwise.P`.
+#
+# The verbatim console rendering is captured alongside it, so even if the
+# structured walk finds nothing usable there is still a tracked artifact the
+# documentation can be checked against.
+# ---------------------------------------------------------------------------
+write_comparison_output <- function(comparison, phase4_dir) {
+  summary_path <- file.path(phase4_dir, "comparison_summary.txt")
+  writeLines(
+    c("=== print(comparison) ===",
+      capture.output(print(comparison)),
+      "",
+      "=== summary(comparison) ===",
+      capture.output(try(summary(comparison), silent = TRUE)),
+      "",
+      "=== str(comparison) ===",
+      capture.output(str(comparison))),
+    summary_path
+  )
+  cat(sprintf("Wrote %s\n", summary_path))
+
+  rows <- list()
+  add_row <- function(statistic, row_label, col_label, value) {
+    if (is.null(row_label)) row_label <- NA_character_
+    if (is.null(col_label)) col_label <- NA_character_
+    rows[[length(rows) + 1]] <<- data.frame(
+      statistic = statistic,
+      row = as.character(row_label),
+      col = as.character(col_label),
+      value = as.numeric(value),
+      stringsAsFactors = FALSE
+    )
+  }
+
+  for (field in names(comparison)) {
+    value <- comparison[[field]]
+    if (is.matrix(value) && is.numeric(value)) {
+      row_labels <- rownames(value)
+      col_labels <- colnames(value)
+      if (is.null(row_labels)) row_labels <- as.character(seq_len(nrow(value)))
+      if (is.null(col_labels)) col_labels <- as.character(seq_len(ncol(value)))
+      for (i in seq_len(nrow(value))) {
+        for (j in seq_len(ncol(value))) {
+          add_row(field, row_labels[i], col_labels[j], value[i, j])
+        }
+      }
+    } else if (is.numeric(value) && !is.null(names(value))) {
+      for (nm in names(value)) {
+        add_row(field, nm, NA_character_, value[[nm]])
+      }
+    } else if (is.numeric(value) && length(value) == 1) {
+      add_row(field, NA_character_, NA_character_, value)
+    }
+  }
+
+  if (length(rows) == 0) {
+    cat("WARNING: no numeric fields found on compare.physignal.z's return\n")
+    cat("object, so comparison_results.csv was NOT written. Inspect the\n")
+    cat("str() section of comparison_summary.txt and extend\n")
+    cat("write_comparison_output() to match the real shape.\n")
+    return(invisible(NULL))
+  }
+
+  comparison_table <- do.call(rbind, rows)
+  comparison_path <- file.path(phase4_dir, "comparison_results.csv")
+  write.csv(comparison_table, comparison_path, row.names = FALSE)
+  cat(sprintf(
+    "Wrote %s (%d row(s); fields found: %s)\n",
+    comparison_path, nrow(comparison_table),
+    paste(unique(comparison_table$statistic), collapse = ", ")
+  ))
+  invisible(comparison_table)
+}
+
+# ---------------------------------------------------------------------------
 # The full analysis (Steps 1-8), as a function so the sensitivity re-run at
 # the bottom uses the EXACT same code path as the primary run rather than a
 # near-copy that could drift out of sync. Every input and output path is an
@@ -217,6 +299,8 @@ run_phase4_analysis <- function(phase4_dir, distance_dir, label) {
     physignal_results[["color"]], physignal_results[["stripe"]], physignal_results[["spot"]]
   )
   print(comparison)
+  cat("\n")
+  write_comparison_output(comparison, phase4_dir)
   cat("\n")
 
   # -------------------------------------------------------------------------
