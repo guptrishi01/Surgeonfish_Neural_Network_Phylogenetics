@@ -45,3 +45,9 @@ todo.txt
 .coverage
 coverage.xml
 htmlcov/
+
+# Exception: the patternize equivalence-check inputs. These are small
+# (~560KB total) and must be present for Part B of notebooks/Followups.ipynb
+# to run anywhere - regenerating them needs data/extracted_fish/, which is
+# deliberately not tracked. Committing them keeps the check reproducible.
+!outputs/patternize_check/*.png

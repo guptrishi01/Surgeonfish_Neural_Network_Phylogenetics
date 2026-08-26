@@ -1,0 +1,4 @@
+image,masked_pixels,pixels_compared,pixels_dropped,dropped_pct,python_fractions
+Acanthurus__Acanthurus_lineatus__000_reference,105470,105000,470,0.4456,0.302952 0.276038 0.245381 0.175629
+Zebrasoma__Zebrasoma_flavescens__000_reference,90849,90500,349,0.3842,0.423470 0.420088 0.123403 0.033039
+Ctenochaetus__Ctenochaetus_striatus__000_reference,113133,113000,133,0.1176,0.491885 0.294664 0.204416 0.009035

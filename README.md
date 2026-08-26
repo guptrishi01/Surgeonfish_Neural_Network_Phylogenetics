@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.3.0** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.4.0** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -352,28 +352,38 @@ are actionable and unfinished.
 
 | # | item | why it matters |
 | --- | --- | --- |
-| 1 | **Register the GBIF derived-dataset DOI** — the table is built and ready | All 1,878 occurrences resolved to 5 source datasets ([`outputs/gbif_derived_dataset.csv`](outputs/gbif_derived_dataset.csv)). Only the registration itself remains, at [gbif.org/derived-dataset/register](https://www.gbif.org/derived-dataset/register). **Blocks publication.** |
+| 1 | **GBIF derived-dataset DOI — table built, registration deliberately not done** | All 1,878 occurrences resolved to 5 source datasets ([`outputs/gbif_derived_dataset.csv`](outputs/gbif_derived_dataset.csv)). GBIF's data user agreement asks for a DOI citation when data is *used in research or policy*; this project is exploratory work that isn't being published, so the trigger doesn't apply. The table is ready if that changes — register at [gbif.org/derived-dataset/register](https://www.gbif.org/derived-dataset/register). |
 | 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
-| 3 | **A *conclusive* patternize equivalence check** | A first attempt ran (see below) but is confounded and neither confirms nor refutes the port. Colour carries the headline result, so this remains the largest unquantified risk. |
+| 3 | **Run the fixed patternize equivalence check** | The first attempt was confounded; the fix is built and ready (see below) but the R side has not been run yet. Colour carries the headline result, so this remains the largest unquantified risk until it is. |
 | 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
 | 5 | ~~Test dropping the redundant thresholded proportions~~ — **done** | Every verdict is unchanged without them; the result does not depend on the redundancy. |
 
 Item 3 remains the largest unquantified risk in the pipeline: it sits directly upstream
 of the only significant finding.
 
-### The patternize check, and why it's inconclusive
+### The patternize check: first attempt, and the fix
 
-Running `patternize::kImage()` with the same `startCenter` matrix our implementation used
-gives cluster fractions that differ by 0.11–0.26 on three test images. That sounds
-alarming but does not mean the port is wrong — **the comparison is confounded**.
-`kImage()` clusters the entire raster including the grey background of the mask cutout,
-while `pattern_extractor` clusters masked-in pixels only, so the two are partitioning
-different pixel sets. The dominant-cluster structure agrees qualitatively (both find one
-large cluster and a tail of smaller ones) but the magnitudes are not comparable.
+The first attempt compared `patternize::kImage()` against our clustering on the same
+crop and found cluster fractions differing by 0.11–0.26. That looks alarming but
+established nothing: **the comparison was confounded.** `kImage()` clusters the entire
+raster including the grey background of the mask cutout, while `pattern_extractor`
+clusters masked-in pixels only — the two were partitioning different pixel sets.
 
-A conclusive version needs `kImage()`'s `maskToNA` argument to exclude the background so
-both implementations see the same pixels. Until then the port is **unvalidated, not
-invalidated** — the check as run establishes neither.
+The fix removes the confound rather than adjusting for it. `outputs/patternize_check/`
+now holds, per test image, a PNG containing **only the masked-in pixels** reshaped into a
+rectangle. There is no background left for one implementation to include and the other to
+exclude, so both cluster an identical pixel multiset from an identical `startCenter`
+matrix. At most 0.45% of pixels are dropped to make the count rectangular, reported per
+image in `python_reference.csv`.
+
+The R side (Part B of [`notebooks/Followups.ipynb`](notebooks/Followups.ipynb)) also
+checks the raster's value range before clustering and rescales the starting centres if
+the reader returns 0–1 rather than 0–255, rather than assuming either.
+
+**Not yet run**, so the port is still **unvalidated — not invalidated**. With the confound
+gone, the resulting number is a genuine algorithmic comparison: small differences are
+expected from k-means convergence details, while a large disagreement would indicate a
+real porting bug.
 
 ---
 
