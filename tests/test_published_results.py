@@ -171,6 +171,119 @@ def test_pattern_features_covers_every_accepted_image_except_the_validation_excl
 
 
 # --------------------------------------------------------------------------
+# Detector validation
+# --------------------------------------------------------------------------
+
+# The detector table published in README.md and METHODS.md, as
+# dimension -> (agreement, precision, recall, f1, true positives).
+PUBLISHED_DETECTOR_METRICS = {
+    "is_solid": (0.703, 0.712, 0.849, 0.775, 79),
+    "stripe_present": (0.774, 0.400, 0.500, 0.444, 14),
+    "spot_present": (0.800, 0.105, 0.125, 0.114, 2),
+}
+
+
+def _load_labels() -> dict[str, dict]:
+    return json.loads(
+        (ROOT / "reports/pattern_validation_labels.json").read_text(encoding="utf-8")
+    )["labels"]
+
+
+def _detector_stats() -> dict[str, tuple]:
+    """Recomputes each detector's confusion metrics from the raw inputs.
+
+    Deliberately reads the hand labels and ``pattern_features.csv`` rather
+    than the comparison report, so the report itself can be checked against
+    this instead of being trusted as the source.
+
+    Returns:
+        dimension -> (agreement, precision, recall, f1, true positives).
+    """
+    labels = _load_labels()
+    features = {r["image_key"]: r for r in _read_csv("reports/pattern_features.csv")}
+
+    stats = {}
+    for dimension in PUBLISHED_DETECTOR_METRICS:
+        tp = fp = fn = tn = 0
+        for image_key, label in labels.items():
+            row = features.get(image_key)
+            if row is None:
+                continue
+            extracted = row[dimension] == "True"
+            manual = bool(label[dimension])
+            tp += extracted and manual
+            fp += extracted and not manual
+            fn += (not extracted) and manual
+            tn += (not extracted) and not manual
+        precision = tp / (tp + fp) if tp + fp else 0.0
+        recall = tp / (tp + fn) if tp + fn else 0.0
+        stats[dimension] = (
+            (tp + tn) / (tp + fp + fn + tn),
+            precision,
+            recall,
+            2 * precision * recall / (precision + recall) if precision + recall else 0.0,
+            tp,
+        )
+    return stats
+
+
+def test_published_detector_metrics_follow_from_the_hand_labels():
+    stats = _detector_stats()
+    names = ("agreement", "precision", "recall", "f1")
+
+    for dimension, published in PUBLISHED_DETECTOR_METRICS.items():
+        *rates, tp = stats[dimension]
+        assert tp == published[4], (
+            f"{dimension} true positives: {tp}, documentation claims {published[4]}"
+        )
+        for value, claimed, name in zip(rates, published, names):
+            assert abs(value - claimed) < 0.001, (
+                f"{dimension} {name}: {value:.3f}, documentation claims {claimed}"
+            )
+
+
+def test_validation_report_is_not_stale_relative_to_the_features_it_summarises():
+    """The comparison report is derived, so it can silently outlive its inputs.
+
+    It did exactly that: it survived the v6.2.0 stripe recalibration without
+    being regenerated, so it went on describing thresholds the code no longer
+    used - 14.3% stripe recall against the 50.0% that README, METHODS and the
+    figures all reported - while every other file moved. Nothing caught it
+    because nothing compared the report to what it claims to summarise.
+    """
+    labels = _load_labels()
+    features = {r["image_key"]: r for r in _read_csv("reports/pattern_features.csv")}
+
+    drifted = []
+    for row in _read_csv("reports/pattern_validation_report.csv"):
+        key, dimension = row["image_key"], row["dimension"]
+        current = features[key][dimension] == "True"
+        manual = bool(labels[key][dimension])
+
+        if (row["extracted"] == "True") != current:
+            drifted.append(f"{key}/{dimension}")
+        assert (row["manual"] == "True") == manual, f"{key}/{dimension} label drifted"
+        assert (row["agree"] == "True") == (manual == current), (
+            f"{key}/{dimension} agree column disagrees with its own two columns"
+        )
+
+    assert not drifted, (
+        f"{len(drifted)} report row(s) disagree with pattern_features.csv - "
+        "regenerate via pattern_extractor.validation.compare_to_features"
+    )
+
+
+def test_stripe_recalibration_baseline_still_supports_the_claim_made_about_it():
+    """Guards the figure caption: "recall tripled at identical precision"."""
+    baseline = {r["metric"]: float(r["value"])
+                for r in _read_csv("reports/stripe_recalibration_baseline.csv")}
+    _, precision, recall, _, _ = _detector_stats()["stripe_present"]
+
+    assert abs(baseline["precision"] - precision) < 0.001, "precision was not held fixed"
+    assert recall > 3 * baseline["recall"] - 0.01, "recall no longer roughly tripled"
+
+
+# --------------------------------------------------------------------------
 # Aggregation
 # --------------------------------------------------------------------------
 

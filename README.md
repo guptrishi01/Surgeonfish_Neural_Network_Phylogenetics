@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.7.1** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.7.2** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -209,7 +209,7 @@ git clone https://github.com/guptrishi01/Surgeonfish_Neural_Network_Phylogenetic
 cd Surgeonfish_Neural_Network_Phylogenetics
 pip install -e .            # base: requests, Pillow, numpy, scipy, biopython
 pip install -e ".[vision]"  # adds torch/transformers/sam2 - only for Phase 1
-pytest                      # 206 tests, no GPU needed
+pytest                      # 209 tests, no GPU needed
 ```
 
 | phase | notebook | runtime | notes |
@@ -301,7 +301,7 @@ hand-collected, not scraped from web search results.
 │   ├── r/phase4_kmult.R       Phase 4 · physignal.z, compare.physignal.z, Mantel
 │   └── scripts/               figure generation + check-input builders
 ├── notebooks/                 Colab notebooks, one per phase
-├── tests/                     183 tests, GPU calls mocked
+├── tests/                     209 tests, GPU calls mocked
 ├── data/
 │   ├── raw_images/            64 species · zipped source photos
 │   ├── phylogeny/             reference tree, coverage table, synonyms

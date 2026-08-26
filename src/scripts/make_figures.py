@@ -240,6 +240,7 @@ def figure_validation() -> None:
             "precision": prec, "recall": rec,
             "f1": 2 * prec * rec / (prec + rec) if prec + rec else 0.0,
             "tp": tp,
+            "n": tp + fp + fn + tn,
         }
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11.5, 4.0),
@@ -264,14 +265,23 @@ def figure_validation() -> None:
                   fontweight="bold", loc="left")
     ax1.grid(axis="y", color=GRID, lw=0.6)
     ax1.set_axisbelow(True)
-    ax1.annotate(f"only {stats['spot_present']['tp']} true positives\nin 155 images",
+    ax1.annotate(f"only {stats['spot_present']['tp']} true positives\n"
+                 f"in {stats['spot_present']['n']} images",
                  xy=(2 + width, stats["spot_present"]["recall"]),
                  xytext=(1.42, 0.60), fontsize=8, color=WARM,
                  arrowprops=dict(arrowstyle="->", color=WARM, lw=1))
 
-    before = {"precision": 0.400, "recall": 0.143, "f1": 0.211}
-    after = {"precision": 0.400, "recall": 0.500, "f1": 0.444}
+    # The "after" bars are recomputed live from the same labels and features
+    # as the left panel, so this panel cannot drift from the detector it
+    # describes. The "before" bars are a historical measurement - the
+    # pre-v6.2.0 thresholds are gone from the code, so nothing current can
+    # reproduce them - and are read from the record captured at recalibration
+    # rather than typed in here.
     m = ["precision", "recall", "f1"]
+    baseline = {r["metric"]: r["value"]
+                for r in read_csv("reports/stripe_recalibration_baseline.csv")}
+    before = {k: float(baseline[k]) for k in m}
+    after = {k: stats["stripe_present"][k] for k in m}
     xx = np.arange(len(m))
     ax2.bar(xx - 0.19, [before[k] for k in m], 0.38, label="before", color=MUTED)
     ax2.bar(xx + 0.19, [after[k] for k in m], 0.38, label="after", color=ACCENT)
@@ -286,7 +296,8 @@ def figure_validation() -> None:
     ax2.grid(axis="y", color=GRID, lw=0.6)
     ax2.set_axisbelow(True)
 
-    fig.suptitle("Validation against 155 hand-labelled images",
+    fig.suptitle(f"Validation against {stats['spot_present']['n']} "
+                 f"hand-labelled images",
                  fontsize=12.5, fontweight="bold", x=0.008, ha="left", y=1.04)
     fig.text(0.008, -0.07,
              "Left: spot_present has the highest agreement of the three detectors and is "

@@ -1,0 +1,6 @@
+metric,value
+precision,0.400000
+recall,0.142857
+f1,0.210526
+true_positives,4
+labeled_images,155
