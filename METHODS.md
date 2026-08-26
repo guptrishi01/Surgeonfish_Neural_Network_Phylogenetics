@@ -81,8 +81,19 @@ species* rather than variation within one:
 2. **The stripe/spot geometry analysis is this project's own extension** on
    top of the colour-region output, not a capability *patternize* provides.
 
-**Open gap:** this is a genuine Python port, and no numerical-equivalence
-check against the R package exists. Tracked as follow-up work.
+**Validated against the R package.** Both implementations were run on identical
+pixel sets from identical starting centres (`kImage(..., startCenter = ...)`),
+giving a worst disagreement of **0.0037** across 12 cluster fractions on three
+species — against a 0.05 threshold set before the run. See
+`outputs/patternize_check/` and README.md.
+
+Worth recording how the check itself had to be fixed: a first version compared
+the two on the same *crop* and reported differences of 0.11–0.26. That was an
+artifact, not a finding — `kImage()` clusters the entire raster including the
+mask cutout's grey background, while `pattern_extractor` clusters masked-in
+pixels only, so the two were partitioning different pixel sets. Rebuilding the
+inputs to contain only masked-in pixels dropped the worst disagreement from
+0.2638 to 0.0037 without touching the code under test.
 
 ### Validation against hand labels
 

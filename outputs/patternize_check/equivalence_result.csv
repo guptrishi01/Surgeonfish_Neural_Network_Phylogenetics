@@ -1,0 +1,4 @@
+"image","patternize_kImage_fractions","pattern_extractor_fractions","max_abs_difference"
+"Acanthurus_lineatus","0.3030 0.2787 0.2448 0.1735","0.3030 0.2760 0.2454 0.1756",0.0027
+"Ctenochaetus_striatus","0.4884 0.2943 0.2081 0.0092","0.4919 0.2947 0.2044 0.0090",0.0037
+"Zebrasoma_flavescens","0.4209 0.4189 0.1237 0.0365","0.4235 0.4201 0.1234 0.0330",0.0034

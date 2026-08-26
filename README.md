@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.4.0** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.5.0** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -337,8 +337,6 @@ pipeline.
   should be read accordingly.
 - **Uneven taxon sampling**, especially *Prionurus* (43%) and *Naso* (70%),
   and *Acanthurus* at 54% after the phylogeny restriction.
-- **The *patternize* port is unvalidated** against the original R package — no
-  numerical-equivalence check exists yet.
 - **The synonym table is NCBI-derived**, not a fish taxonomic authority. It
   gates the one match (*Zebrasoma veliferum*) that makes coverage 50 rather
   than 49.
@@ -354,36 +352,42 @@ are actionable and unfinished.
 | --- | --- | --- |
 | 1 | **GBIF derived-dataset DOI — table built, registration deliberately not done** | All 1,878 occurrences resolved to 5 source datasets ([`outputs/gbif_derived_dataset.csv`](outputs/gbif_derived_dataset.csv)). GBIF's data user agreement asks for a DOI citation when data is *used in research or policy*; this project is exploratory work that isn't being published, so the trigger doesn't apply. The table is ready if that changes — register at [gbif.org/derived-dataset/register](https://www.gbif.org/derived-dataset/register). |
 | 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
-| 3 | **Run the fixed patternize equivalence check** | The first attempt was confounded; the fix is built and ready (see below) but the R side has not been run yet. Colour carries the headline result, so this remains the largest unquantified risk until it is. |
+| 3 | ~~Validate the *patternize* port~~ — **done** | Worst disagreement **0.0037** across 12 cluster fractions on 3 species, against a 0.05 threshold set before running. The port is validated. |
 | 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
 | 5 | ~~Test dropping the redundant thresholded proportions~~ — **done** | Every verdict is unchanged without them; the result does not depend on the redundancy. |
 
 Item 3 remains the largest unquantified risk in the pipeline: it sits directly upstream
 of the only significant finding.
 
-### The patternize check: first attempt, and the fix
+### The patternize port is validated
 
-The first attempt compared `patternize::kImage()` against our clustering on the same
-crop and found cluster fractions differing by 0.11–0.26. That looks alarming but
-established nothing: **the comparison was confounded.** `kImage()` clusters the entire
-raster including the grey background of the mask cutout, while `pattern_extractor`
-clusters masked-in pixels only — the two were partitioning different pixel sets.
+`pattern_extractor`'s colour clustering is a Python reimplementation of *patternize*'s
+reference-initialised k-means, and until now it had never been checked against the R
+package — the largest unquantified risk in the pipeline, sitting directly upstream of the
+only significant result.
 
-The fix removes the confound rather than adjusting for it. `outputs/patternize_check/`
-now holds, per test image, a PNG containing **only the masked-in pixels** reshaped into a
-rectangle. There is no background left for one implementation to include and the other to
-exclude, so both cluster an identical pixel multiset from an identical `startCenter`
-matrix. At most 0.45% of pixels are dropped to make the count rectangular, reported per
-image in `python_reference.csv`.
+Running both on identical pixel sets from identical starting centres
+([`outputs/patternize_check/equivalence_result.csv`](outputs/patternize_check/equivalence_result.csv)):
 
-The R side (Part B of [`notebooks/Followups.ipynb`](notebooks/Followups.ipynb)) also
-checks the raster's value range before clustering and rescales the starting centres if
-the reader returns 0–1 rather than 0–255, rather than assuming either.
+| image | `patternize::kImage()` | `pattern_extractor` | max diff |
+| --- | --- | --- | --- |
+| *A. lineatus* (striped) | 0.3030 0.2787 0.2448 0.1735 | 0.3030 0.2760 0.2454 0.1756 | 0.0027 |
+| *C. striatus* (mid) | 0.4884 0.2943 0.2081 0.0092 | 0.4919 0.2947 0.2044 0.0090 | 0.0037 |
+| *Z. flavescens* (plain) | 0.4209 0.4189 0.1237 0.0365 | 0.4235 0.4201 0.1234 0.0330 | 0.0034 |
 
-**Not yet run**, so the port is still **unvalidated — not invalidated**. With the confound
-gone, the resulting number is a genuine algorithmic comparison: small differences are
-expected from k-means convergence details, while a large disagreement would indicate a
-real porting bug.
+**Worst disagreement: 0.0037**, against a 0.05 threshold stated *before* the run. That is
+the scale expected from k-means convergence differences between two independent
+implementations, not a porting bug.
+
+**Getting there required fixing the test twice.** A first attempt compared the two on the
+same crop and reported differences of 0.11–0.26 — which established nothing, because
+`kImage()` clusters the whole raster including the mask cutout's grey background while
+`pattern_extractor` clusters masked-in pixels only. The two were partitioning different
+pixel sets. Re-running on images containing *only* masked-in pixels dropped the worst
+disagreement from **0.2638 to 0.0037** — a ~70× change produced entirely by fixing the
+comparison, not the code under test. The alarming first number was an artifact of the
+measurement, which is worth recording given how easily it could have been read as a
+finding.
 
 ---
 
