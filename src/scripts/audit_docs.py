@@ -85,6 +85,17 @@ check("no 'Kmult re-run pending' language",
       "re-run pending" not in readme and "*re-run pending*" not in readme)
 check("no 'not yet run' in README/METHODS",
       "not yet run" not in readme and "not yet run" not in methods)
+# Google Colab is the only execution target - CLAUDE.md's code conventions say
+# so explicitly - but a docstring claimed the opposite for five months, naming
+# an HPC/SLURM setup that was never used and citing CLAUDE.md as its source.
+slurm_claims = [
+    str(p.relative_to(ROOT)) for p in (ROOT / "src").rglob("*.py")
+    # This file is exempt: stating the rule requires naming what it forbids.
+    if p.name != "audit_docs.py"
+    and re.search(r"slurm|\bhpc\b", p.read_text(encoding="utf-8"), re.I)
+]
+check("no source file claims an HPC/SLURM execution target",
+      not slurm_claims, ", ".join(slurm_claims))
 check("README version matches newest changelog entry",
       (m := re.search(r"\*\*Version (\d+\.\d+\.\d+)\*\*", readme))
       and (c := re.search(r"- \*\*(\d+\.\d+\.\d+)\*\*", changelog))

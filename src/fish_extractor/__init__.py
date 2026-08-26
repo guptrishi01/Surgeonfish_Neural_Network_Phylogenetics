@@ -11,8 +11,8 @@ into a precise segmentation mask. Both are used via Hugging Face
 ``transformers`` rather than their original repos, since Grounding DINO's
 original IDEA-Research implementation requires compiling a custom CUDA op -
 a common friction point on Colab, which is this project's execution target
-(not the UNC Charlotte HPC/SLURM setup CLAUDE.md describes for other parts
-of this pipeline).
+for every GPU-dependent stage - nothing in this pipeline runs on a local
+GPU or a cluster, see CLAUDE.md's code conventions.
 
 No training happens in this phase: detection and segmentation both run
 zero-shot. Every image that doesn't clearly show one centered fish is
