@@ -2,8 +2,9 @@
 
 Full design rationale for the Surgeonfish Visual Phenomics and Phylogenetic
 Inference pipeline. See [README.md](README.md) for results and how to run it,
-[CHANGELOG.md](CHANGELOG.md) for the development history, and
-[BACKGROUND.md](BACKGROUND.md) for the pattern-genetics literature review.
+[CHANGELOG.md](CHANGELOG.md) for the development history,
+[BACKGROUND.md](BACKGROUND.md) for the pattern-genetics literature review, and
+[`figures/`](figures/) for generated figures of each stage and result.
 
 Much of what follows is **preregistration**: statistical choices were pinned
 in writing, with reasons, before the tests were run. That matters here for a

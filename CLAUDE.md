@@ -2,11 +2,12 @@
 
 Project-specific context for the Surgeonfish Visual Phenomics and Phylogenetic Inference project.
 
-**Document map** (all planned phases are complete as of v6.1.0 — see the Version Control section for what a further change would be versioned as):
+**Document map** (all planned phases are complete; see [CHANGELOG.md](CHANGELOG.md) for the current version, and the Version Control section below for how a further change would be numbered):
 - [README.md](README.md) — research question, results, pipeline, how to run it, limitations.
 - [METHODS.md](METHODS.md) — statistical design and preregistration (why Kmult is primary, the admissibility transforms, integrity checks).
 - [CHANGELOG.md](CHANGELOG.md) — full version history. **The changelog lives here, not in README.md.**
 - [BACKGROUND.md](BACKGROUND.md) — pattern-genetics literature review.
+- `figures/` — generated figures; regenerate with `python src/scripts/make_figures.py`.
 
 ## Version Control
 
@@ -35,6 +36,10 @@ Images are sourced programmatically via `src/dataset_builder/` (see its module d
 **Backend:** pytest for unit tests of each pipeline stage (segmentation evaluation, feature extraction, distance matrix construction, Kmult/Mantel phylogenetic-signal tests). Run with coverage (`pytest --cov`) — treat coverage gaps as a signal to look for untested *or redundant* paths, not just a number to push up.
 
 **Phase gate:** run the full `pytest` suite after implementing each rebuild phase, before considering that phase done — not just once at the end. This project has already shipped one silently-broken metric; catching a regression at the phase boundary it was introduced in, rather than several phases later, is the entire point.
+
+**Published results are guarded by tests too.** `tests/test_published_results.py` reads the real tracked outputs and asserts the numbers quoted in README.md follow from them — including recomputing the Mantel statistics and the Benjamini–Hochberg corrections in Python, so the R output is verified rather than trusted. It skips cleanly when a result file is absent (e.g. while an R-dependent re-run is outstanding). If you regenerate one result file without the others, these fail — which is the point.
+
+**Read F1, not agreement, for the pattern detectors.** Class imbalance inflates agreement badly enough that `spot_present` scores the *highest* agreement of the three while being by far the worst (F1 0.114, 2 true positives in 155 images). This is the same shape as the metric failures this rebuild exists to prevent.
 
 **No guessing on unfamiliar library/API surfaces — verify field names, argument names, and return shapes before writing code that depends on them, not after.** This happened for real: `src/r/phase4_kmult.R`'s first draft called `sapply(physignal_results, function(r) r$P.value)` on `geomorph::physignal.z()`'s return object without ever confirming that field name against real output. Steps 0–4 ran correctly — including several real minutes of computation — before Step 5 crashed on a wrong guess (`P.value` isn't the actual field name). Before writing code that depends on an unfamiliar function's exact return shape or argument names, confirm it against real documentation/source, or a small throwaway call whose actual output gets inspected (`str()`, `dir()`, `print()`, whatever the language offers) — not a plausible-looking guess carried straight into the real implementation. Applies most acutely to R/`geomorph` calls, since no R runtime is available in this project's usual local working environment to check interfaces the way Python ones can be checked directly — flag that limitation explicitly rather than guessing past it.
 

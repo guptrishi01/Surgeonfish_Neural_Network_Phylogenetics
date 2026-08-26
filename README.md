@@ -6,7 +6,7 @@ Creative-Commons photographs of 64 Acanthuridae species, reduces them to
 per-species feature vectors, and tests each pattern dimension for
 phylogenetic signal against a molecular phylogeny.
 
-**Version 6.7.0** — all planned phases (0–5) complete, audited, and re-verified after
+**Version 6.7.1** — all planned phases (0–5) complete, audited, and re-verified after
 the stripe recalibration. See
 [CHANGELOG.md](CHANGELOG.md) for the full history, [METHODS.md](METHODS.md) for
 the statistical design, and [BACKGROUND.md](BACKGROUND.md) for the
@@ -308,7 +308,16 @@ hand-collected, not scraped from web search results.
 │   ├── genes/                 candidate genes from the literature review
 │   └── genome_assemblies/     NCBI availability survey (metadata only)
 ├── reports/                   per-image features, audit logs, hand labels
-├── outputs/                   distance matrices + Phase 4 results
+├── outputs/
+│   ├── *_distance_matrix.csv  49×49 pattern + patristic distances (primary set)
+│   ├── phase4/                Kmult + Mantel results, primary 49-species run
+│   ├── phase4_min5/           …the 47-species sparse-species sensitivity run
+│   ├── phase4_noprops/        …with the redundant thresholded proportions dropped
+│   ├── phase4_pre_recalibration/  Kmult results from before the v6.2.0 stripe fix
+│   ├── sensitivity_min5/      Phase 3 distance matrices for the 47-species set
+│   ├── sensitivity_with_reference/  …for the 50-species set (reference photos kept)
+│   ├── patternize_check/      inputs + result for the R-package equivalence check
+│   └── gbif_derived_dataset.csv   source-dataset attribution table
 ├── figures/                   generated figures (src/scripts/make_figures.py)
 ├── METHODS.md                 statistical design and preregistration
 ├── CHANGELOG.md               full version history
@@ -358,20 +367,20 @@ are actionable and unfinished.
 | # | item | why it matters |
 | --- | --- | --- |
 | 1 | **GBIF derived-dataset DOI — table built, registration deliberately not done** | All 1,878 occurrences resolved to 5 source datasets ([`outputs/gbif_derived_dataset.csv`](outputs/gbif_derived_dataset.csv)). GBIF's data user agreement asks for a DOI citation when data is *used in research or policy*; this project is exploratory work that isn't being published, so the trigger doesn't apply. The table is ready if that changes — register at [gbif.org/derived-dataset/register](https://www.gbif.org/derived-dataset/register). |
-| 2 | **Improve `stripe_present` recall** (~14%) | The highest-value scientific next step. Stripe is the one dimension whose null is uninterpretable for a fixable reason. |
+| 2 | ~~Improve `stripe_present` recall~~ — **done** | Recalibrated against real SAM 2 masks: recall **14.3% → 50.0%** at identical precision, validated held-out over 200 split-half trials. Stripe's null is now interpretable rather than confounded with poor measurement. |
 | 3 | ~~Validate the *patternize* port~~ — **done** | Worst disagreement **0.0037** across 12 cluster fractions on 3 species, against a 0.05 threshold set before running. The port is validated. |
 | 4 | ~~Cross-check the synonym table against a fish taxonomic authority~~ — **done** | FishBase confirms *Zebrasoma velifer* (Bloch, 1795), Acanthuridae. The project labels it *veliferum*, a nomenclatural convention difference, not an identity error. |
 | 5 | ~~Test dropping the redundant thresholded proportions~~ — **done, both tests** | Every verdict is stable under Kmult *and* Mantel ([`outputs/phase4_noprops/`](outputs/phase4_noprops/)). Colour in fact **strengthens** without them (BH *p* 0.027 → 0.009): the redundancy was mildly diluting the signal, not creating it. |
 
-Item 3 remains the largest unquantified risk in the pipeline: it sits directly upstream
-of the only significant finding.
+**Four of the five are closed by evidence; the fifth is deliberately skipped.** What
+remains is new research rather than unfinished work — see Status below.
 
 ### The patternize port is validated
 
 `pattern_extractor`'s colour clustering is a Python reimplementation of *patternize*'s
-reference-initialised k-means, and until now it had never been checked against the R
-package — the largest unquantified risk in the pipeline, sitting directly upstream of the
-only significant result.
+reference-initialised k-means. For most of this project's life it had never been checked
+against the R package, which made it the largest unquantified risk in the pipeline —
+it sits directly upstream of the only significant result. That check has now been run.
 
 Running both on identical pixel sets from identical starting centres
 ([`outputs/patternize_check/equivalence_result.csv`](outputs/patternize_check/equivalence_result.csv)):
@@ -407,7 +416,18 @@ rather than a preregistered test. Every statistical choice here was pinned in
 writing before the tests ran ([METHODS.md](METHODS.md)), and every phase was
 verified against real output before the next began.
 
-**Phase 5 (this documentation rewrite) was the last planned phase.**
+**Phase 5 (the documentation rewrite) was the last planned phase.** Work since then has
+been verification rather than new pipeline: a full data-integrity audit (now a permanent
+test module), the stripe recalibration against real masks, validating the *patternize*
+port against the R package, and closing the remaining follow-ups. The pipeline itself has
+not changed since the stripe fix.
+
+**What would count as new work**, if this were picked up again: ecological covariates and
+`procD.pgls` to separate inherited pattern from phylogenetically conserved ecology — the
+distinction this design explicitly cannot make; more hand labels to make the spot
+dimension testable (16 positives is too few to calibrate against); or more species and
+images to lift n=49, which currently limits power enough that null results are
+inconclusive by construction.
 
 ### Phase 6 was scoped and deliberately not pursued
 

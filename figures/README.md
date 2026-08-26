@@ -14,3 +14,7 @@ script, so a figure cannot drift from the data it claims to show.
 
 `fig1_pipeline.png` needs `data/extracted_fish/` (not tracked — ~480MB); the
 script skips that figure with a message rather than failing if it is absent.
+
+## Related
+
+`python src/scripts/audit_docs.py` checks that the numbers quoted in the documentation still match the result files, and that no section contradicts another — the kind of drift a test suite cannot see.
